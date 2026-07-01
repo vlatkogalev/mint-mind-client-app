@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "766582325087",
+    "project_id": "mintmind-1e828",
+    "storage_bucket": "mintmind-1e828.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:766582325087:android:4ce61bdc1b76df3d4840ea",
+        "android_client_info": {
+          "package_name": "com.vlatkogalev.mintmind"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKZ8bvdGF0e9nptAiOXNrXJE1VOvdvDoE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:766582325087:android:6df32d199226f34b4840ea",
+        "android_client_info": {
+          "package_name": "com.vlatkogalev.mintmind.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKZ8bvdGF0e9nptAiOXNrXJE1VOvdvDoE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

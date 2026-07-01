@@ -1,0 +1,166 @@
+package collections.domain.mapper
+
+import collections.data.local.entity.AiAnalysisEntity
+import collections.data.local.entity.CatalogueNumberEntity
+import collections.data.local.entity.CoinDataEntity
+import collections.data.local.entity.CoinDetailsWithRelations
+import collections.domain.model.CatalogueNumber
+import collections.domain.model.CoinDetails
+
+fun CoinDetailsWithRelations.toCoinDetails(): CoinDetails = CoinDetails(
+    id = coin.id,
+    userId = coin.userId,
+    obverseUrl = coin.obverseUrl,
+    reverseUrl = coin.reverseUrl,
+    coinData = coinData?.toCoinData() ?: emptyCoinData(),
+    aiAnalysis = aiAnalysis?.toAiAnalysis() ?: emptyAiAnalysis(),
+    catalogueNumbers = catalogueNumbers.map { it.toCatalogueNumber() },
+    setId = coin.setId,
+    catalogCoinId = coin.catalogCoinId,
+    notes = coin.notes,
+    createdAt = coin.createdAt
+)
+
+private fun CoinDataEntity.toCoinData(): CoinDetails.CoinData = CoinDetails.CoinData(
+    countryOrIssuer = countryOrIssuer,
+    denomination = denomination,
+    seriesName = seriesName,
+    year = year,
+    era = era,
+    mintMark = mintMark,
+    metalComposition = metalComposition,
+    weightGrams = weightGrams,
+    diameterMm = diameterMm,
+    thicknessMm = thicknessMm,
+    edge = edge,
+    obverseDescription = obverseDescription,
+    reverseDescription = reverseDescription,
+    historicalContext = historicalContext,
+    obverseLettering = obverseLettering,
+    reverseLettering = reverseLettering,
+    designerObverse = designerObverse,
+    designerReverse = designerReverse,
+    mintage = mintage,
+    shape = shape,
+    technique = technique,
+    orientation = orientation,
+    mintName = mintName,
+    ruler = ruler,
+    objectType = objectType,
+    demonetized = demonetized,
+    tags = tags,
+    numistaUrl = numistaUrl,
+    obverseThumbnailUrl = obverseThumbnailUrl,
+    reverseThumbnailUrl = reverseThumbnailUrl,
+    minYear = minYear,
+    maxYear = maxYear
+)
+
+private fun AiAnalysisEntity.toAiAnalysis(): CoinDetails.AiAnalysis = CoinDetails.AiAnalysis(
+    overallConfidence = overallConfidence,
+    confidenceCountry = confidenceCountry,
+    confidenceDenomination = confidenceDenomination,
+    confidenceSeries = confidenceSeries,
+    confidenceYear = confidenceYear,
+    confidenceEra = confidenceEra,
+    mintMarkStatus = mintMarkStatus,
+    mintMarkConfidence = mintMarkConfidence,
+    gradeName = gradeName,
+    gradeAbbreviation = gradeAbbreviation,
+    gradeNumeric = gradeNumeric,
+    gradeConfidence = gradeConfidence,
+    rarityQualitative = rarityQualitative,
+    rarityScore = rarityScore,
+    valueLow = valueLow,
+    valueHigh = valueHigh,
+    valueCurrency = valueCurrency,
+    positiveFeatures = positiveFeatures,
+    negativeFeatures = negativeFeatures,
+    supplySummary = supplySummary,
+    demandSummary = demandSummary,
+    valueDisclaimer = valueDisclaimer,
+    analysisNotes = analysisNotes,
+    obverseVisible = obverseVisible,
+    reverseVisible = reverseVisible,
+    imageFocus = imageFocus,
+    imageLighting = imageLighting,
+    imageResolution = imageResolution,
+    imageCropping = imageCropping,
+    imageIssues = imageIssues,
+    rawJson = rawJson
+)
+
+private fun emptyCoinData(): CoinDetails.CoinData = CoinDetails.CoinData(
+    countryOrIssuer = null,
+    denomination = null,
+    seriesName = null,
+    year = null,
+    era = null,
+    mintMark = null,
+    metalComposition = null,
+    weightGrams = null,
+    diameterMm = null,
+    thicknessMm = null,
+    edge = null,
+    obverseDescription = null,
+    reverseDescription = null,
+    historicalContext = null,
+    obverseLettering = null,
+    reverseLettering = null,
+    designerObverse = null,
+    designerReverse = null,
+    mintage = null,
+    shape = null,
+    technique = null,
+    orientation = null,
+    mintName = null,
+    ruler = null,
+    objectType = null,
+    demonetized = null,
+    tags = null,
+    numistaUrl = null,
+    obverseThumbnailUrl = null,
+    reverseThumbnailUrl = null,
+    minYear = null,
+    maxYear = null
+)
+
+private fun emptyAiAnalysis(): CoinDetails.AiAnalysis = CoinDetails.AiAnalysis(
+    overallConfidence = null,
+    confidenceCountry = null,
+    confidenceDenomination = null,
+    confidenceSeries = null,
+    confidenceYear = null,
+    confidenceEra = null,
+    mintMarkStatus = null,
+    mintMarkConfidence = null,
+    gradeName = null,
+    gradeAbbreviation = null,
+    gradeNumeric = null,
+    gradeConfidence = null,
+    rarityQualitative = null,
+    rarityScore = null,
+    valueLow = null,
+    valueHigh = null,
+    valueCurrency = null,
+    positiveFeatures = null,
+    negativeFeatures = null,
+    supplySummary = null,
+    demandSummary = null,
+    valueDisclaimer = null,
+    analysisNotes = null,
+    obverseVisible = null,
+    reverseVisible = null,
+    imageFocus = null,
+    imageLighting = null,
+    imageResolution = null,
+    imageCropping = null,
+    imageIssues = null,
+    rawJson = null
+)
+
+fun CatalogueNumberEntity.toCatalogueNumber(): CatalogueNumber = CatalogueNumber(
+    catalogueName = catalogueName,
+    number = number,
+    confidence = confidence
+)

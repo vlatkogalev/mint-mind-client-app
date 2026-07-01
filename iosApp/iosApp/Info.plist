@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+    "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>CADisableMinimumFrameDurationOnPhone</key>
+        <true />
+        <key>GOOGLE_ANALYTICS_DEFAULT_ALLOW_ANALYTICS_STORAGE</key>
+        <true />
+        <key>NSAppTransportSecurity</key>
+        <dict>
+            <key>NSExceptionDomains</key>
+            <dict>
+                <key>home-iot.xyz</key>
+                <dict>
+                    <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                    <true />
+                    <key>NSIncludesSubdomains</key>
+                    <true />
+                </dict>
+            </dict>
+        </dict>
+        <key>NSPhotoLibraryUsageDescription</key>
+        <string>MintMind needs access to your photo library so you can choose coin photos for
+            identification.
+        </string>
+        <key>UIApplicationSceneManifest</key>
+        <dict>
+            <key>UIApplicationSupportsMultipleScenes</key>
+            <false />
+        </dict>
+        <key>UILaunchScreen</key>
+        <dict />
+    </dict>
+</plist>
