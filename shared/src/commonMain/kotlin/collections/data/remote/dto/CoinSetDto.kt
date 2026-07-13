@@ -20,6 +20,15 @@ data class CoinSetDto(
     @SerialName("coinCount")
     val coinCount: Int,
 
+    @SerialName("totalValue")
+    val totalValue: Double = 0.0,
+
+    @SerialName("issuerCount")
+    val issuerCount: Int = 0,
+
     @SerialName("createdAt")
-    val createdAt: Long
+    val createdAt: Long,
+
+    @SerialName("updatedAt")
+    val updatedAt: Long = createdAt
 )

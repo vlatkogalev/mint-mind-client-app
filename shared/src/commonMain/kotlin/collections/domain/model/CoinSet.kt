@@ -6,5 +6,8 @@ data class CoinSet(
     val description: String?,
     val previewObverseUrls: List<String>,
     val coinCount: Int,
-    val createdAt: Long
+    val totalValue: Double,
+    val issuerCount: Int,
+    val createdAt: Long,
+    val updatedAt: Long
 )

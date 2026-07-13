@@ -86,7 +86,7 @@ private fun MainContent(
                 top = paddingValues.calculateTopPadding(),
                 start = 16.dp,
                 end = 16.dp,
-                bottom = paddingValues.calculateBottomPadding()
+                applyStartCutoutPadding = false
             )
     ) {
         Spacer(modifier = Modifier.height(16.dp))

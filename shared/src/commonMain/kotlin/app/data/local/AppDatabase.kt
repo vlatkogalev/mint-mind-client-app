@@ -40,7 +40,7 @@ import user.data.local.entity.UserEntity
         CollectionHighlightsEntity::class,
         CoinSetEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

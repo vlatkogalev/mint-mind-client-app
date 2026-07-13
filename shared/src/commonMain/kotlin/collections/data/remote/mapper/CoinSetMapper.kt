@@ -11,7 +11,10 @@ fun CoinSetDto.toCoinSetEntity(): CoinSetEntity =
         description = description,
         previewObverseUrls = previewObverseUrls,
         coinCount = coinCount,
-        createdAt = createdAt
+        totalValue = totalValue,
+        issuerCount = issuerCount,
+        createdAt = createdAt,
+        updatedAt = updatedAt
     )
 
 fun List<CoinSetDto>.toCoinSetEntities(): List<CoinSetEntity> =
@@ -24,5 +27,8 @@ fun CoinSetEntity.toCoinSet(): CoinSet =
         description = description,
         previewObverseUrls = previewObverseUrls,
         coinCount = coinCount,
-        createdAt = createdAt
+        totalValue = totalValue,
+        issuerCount = issuerCount,
+        createdAt = createdAt,
+        updatedAt = updatedAt
     )

@@ -55,7 +55,7 @@ fun CollectionSummaryTab(
         columns = gridConfig.gridCells,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(bottom = 16.dp),
+        contentPadding = PaddingValues(bottom = 32.dp),
         modifier = Modifier.fillMaxSize()
     ) {
         state.highlights?.let { coins ->

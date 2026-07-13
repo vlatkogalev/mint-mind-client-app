@@ -77,14 +77,26 @@ fun SetItem(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
+                    text = "$${set.totalValue}",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                )
+                Text(
+                    text = "\u2022", style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+                Text(
                     text = pluralStringResource(
                         Res.plurals.collection_set_coin_count,
                         set.coinCount,
                         set.coinCount
                     ),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary
+                    color = MaterialTheme.colorScheme.tertiary,
                 )
             }
 
@@ -100,7 +112,7 @@ fun SetItem(
             )
 
             Text(
-                text = "${stringResource(Res.string.collection_last_updated)} ${set.createdAt.epochMilliToDateRange()}",
+                text = "${stringResource(Res.string.collection_last_updated)} ${set.updatedAt.epochMilliToDateRange()}",
                 style = MaterialTheme.typography.labelMedium,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
@@ -205,7 +217,10 @@ private fun SetItemPreview() {
                     description = "Ancient Roman coins",
                     previewObverseUrls = listOf("", "", "", "", ""),
                     coinCount = 12,
-                    createdAt = 1756131199000L
+                    totalValue = 100.0,
+                    issuerCount = 3,
+                    createdAt = 1756131199000L,
+                    updatedAt = 1756131199000L
                 ),
                 modifier = Modifier,
                 onClick = { }
