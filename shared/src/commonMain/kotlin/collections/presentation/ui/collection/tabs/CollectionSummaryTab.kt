@@ -57,7 +57,7 @@ fun CollectionSummaryTab(
         columns = gridConfig.gridCells,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(bottom = 32.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 96.dp),
         modifier = Modifier.fillMaxSize()
     ) {
         highlightItems(

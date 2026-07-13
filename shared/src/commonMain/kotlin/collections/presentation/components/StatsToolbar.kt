@@ -39,7 +39,7 @@ fun StatsToolbar(
         modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 24.dp)
     ) {
         Text(
             text = "$$totalValue",
@@ -114,7 +114,7 @@ private fun ObjectItemPreview() {
         Box(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
-                .padding(8.dp)
+                .padding(vertical = 8.dp)
         ) {
             StatsToolbar(
                 title = "Collection",

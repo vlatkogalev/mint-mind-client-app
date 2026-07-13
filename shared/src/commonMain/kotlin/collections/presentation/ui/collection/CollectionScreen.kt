@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -84,8 +85,6 @@ private fun MainContent(
             .fillMaxSize()
             .cutoutAwarePadding(
                 top = paddingValues.calculateTopPadding(),
-                start = 16.dp,
-                end = 16.dp,
                 applyStartCutoutPadding = false
             )
     ) {
@@ -180,7 +179,7 @@ private fun CollectionSegmentedButtons(
     val entries = CollectionScreenEntries
 
     Box(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         contentAlignment = Alignment.Center
     ) {
         SingleChoiceSegmentedButtonRow(
