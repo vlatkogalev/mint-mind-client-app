@@ -28,11 +28,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import app.presentation.components.EmptyContent
 import app.presentation.util.calculateGridConfig
 import collections.domain.model.CoinSet
+import collections.presentation.components.SetItem
 import collections.presentation.ui.collection.CollectionState
 import mintmind.shared.generated.resources.Res
 import mintmind.shared.generated.resources.collection_create_set
+import mintmind.shared.generated.resources.collection_empty_set_desc
+import mintmind.shared.generated.resources.collection_empty_set_title
 import mintmind.shared.generated.resources.collection_sort
 import org.jetbrains.compose.resources.stringResource
 
@@ -110,6 +114,29 @@ fun CollectionSetsTab(
                         tint = if (state.isSetMultiSelectModeEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
                     )
                 }
+            }
+        }
+
+        if (state.sets.isEmpty()) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                EmptyContent(
+                    icon = Icons.Outlined.CreateNewFolder,
+                    title = Res.string.collection_empty_set_title,
+                    text = Res.string.collection_empty_set_desc,
+                    modifier = Modifier
+                )
+            }
+        } else {
+            items(
+                count = state.sets.size,
+                key = { index -> state.sets[index].id }
+            ) { index ->
+                val set = state.sets[index]
+                SetItem(
+                    set = set,
+                    modifier = Modifier.width(320.dp).animateItem(),
+                    onClick = { onSelectSet(set.id) }
+                )
             }
         }
     }

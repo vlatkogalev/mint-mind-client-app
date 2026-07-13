@@ -10,23 +10,31 @@ import app.domain.model.EmptyNetworkResult
 import app.domain.model.asEmptyDataNetworkResult
 import app.domain.model.map
 import collections.data.local.dao.CoinDetailsDao
+import collections.data.local.dao.CoinSetDao
 import collections.data.local.dao.CollectionStatsDao
 import collections.data.remote.CoinPagingSource
 import collections.data.remote.dto.CoinDto
+import collections.data.remote.dto.CoinSetDto
 import collections.data.remote.dto.CollectionStatsDto
+import collections.data.remote.dto.CreateCoinSetRequest
 import collections.data.remote.mapper.toAiAnalysisEntity
 import collections.data.remote.mapper.toCatalogueNumberEntities
 import collections.data.remote.mapper.toCoinDataEntity
 import collections.data.remote.mapper.toCoinDetailsEntity
+import collections.data.remote.mapper.toCoinSet
+import collections.data.remote.mapper.toCoinSetEntities
 import collections.data.remote.mapper.toCollectionHighlightsEntities
 import collections.data.remote.mapper.toCollectionStatsEntity
 import collections.domain.CollectionRepository
 import collections.domain.mapper.toCoinDetails
 import collections.domain.mapper.toCollectionStats
 import collections.domain.model.CoinDetails
+import collections.domain.model.CoinSet
 import collections.domain.model.CollectionStats
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -36,6 +44,7 @@ class CollectionRepositoryImpl(
 ) : CollectionRepository {
     private val coinDetailsDao: CoinDetailsDao = db.coinDetailsDao()
     private val collectionStatsDao: CollectionStatsDao = db.collectionStatsDao()
+    private val coinSetDao: CoinSetDao = db.coinSetDao()
 
     override suspend fun storeCollectionStats(): EmptyNetworkResult<NetworkError> {
         return safeCall<CollectionStatsDto> {
@@ -76,4 +85,28 @@ class CollectionRepositoryImpl(
 
     override fun getCoinDetails(id: String): Flow<CoinDetails?> =
         coinDetailsDao.getByIdWithRelations(id).map { it?.toCoinDetails() }
+
+    override suspend fun storeSets(): EmptyNetworkResult<NetworkError> {
+        return safeCall<List<CoinSetDto>> {
+            httpClient.get(urlString = constructUrl("/sets"))
+        }.map { dtos ->
+            coinSetDao.replaceAll(dtos.toCoinSetEntities())
+        }.asEmptyDataNetworkResult()
+    }
+
+    override fun getSets(): Flow<List<CoinSet>> =
+        coinSetDao.getAllSets().map { entities -> entities.map { it.toCoinSet() } }
+
+    override suspend fun createSet(
+        name: String,
+        description: String?
+    ): EmptyNetworkResult<NetworkError> {
+        return safeCall<CoinSetDto> {
+            httpClient.post(urlString = constructUrl("/sets")) {
+                setBody(CreateCoinSetRequest(name = name, description = description))
+            }
+        }.map {
+            storeSets()
+        }.asEmptyDataNetworkResult()
+    }
 }

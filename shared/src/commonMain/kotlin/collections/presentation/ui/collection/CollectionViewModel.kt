@@ -30,8 +30,18 @@ class CollectionViewModel(
             }
             .launchIn(viewModelScope)
 
+        collectionRepository.getSets()
+            .onEach { sets ->
+                _state.value = _state.value.copy(sets = sets)
+            }
+            .launchIn(viewModelScope)
+
         viewModelScope.launch {
             collectionRepository.storeCollectionStats()
+        }
+
+        viewModelScope.launch {
+            collectionRepository.storeSets()
         }
     }
 
@@ -39,6 +49,21 @@ class CollectionViewModel(
         when (action) {
             is CollectionScreenAction.ChangeScreenType -> {
                 _state.value = _state.value.copy(selectedScreenType = action.screenType)
+            }
+
+            is CollectionScreenAction.ShowCreateSetDialog -> {
+                _state.value = _state.value.copy(showCreateSetDialog = true)
+            }
+
+            is CollectionScreenAction.DismissCreateSetDialog -> {
+                _state.value = _state.value.copy(showCreateSetDialog = false)
+            }
+
+            is CollectionScreenAction.CreateSet -> {
+                _state.value = _state.value.copy(showCreateSetDialog = false)
+                viewModelScope.launch {
+                    collectionRepository.createSet(action.name, action.description)
+                }
             }
 
             else -> Unit

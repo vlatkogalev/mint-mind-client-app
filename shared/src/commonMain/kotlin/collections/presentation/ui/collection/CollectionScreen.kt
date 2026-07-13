@@ -32,6 +32,7 @@ import app.presentation.theme.AppTheme
 import app.presentation.util.cutoutAwarePadding
 import collections.domain.model.Coin
 import collections.domain.model.CollectionScreenType
+import collections.presentation.components.CreateSetDialog
 import collections.presentation.components.StatsToolbar
 import collections.presentation.ui.collection.tabs.CollectionAllTab
 import collections.presentation.ui.collection.tabs.CollectionSetsTab
@@ -138,8 +139,12 @@ private fun MainContent(
                 CollectionScreenType.SETS -> {
                     CollectionSetsTab(
                         state = state,
-                        onClickCreateNewSet = { },
-                        onSelectSet = { },
+                        onClickCreateNewSet = {
+                            onScreenAction(CollectionScreenAction.ShowCreateSetDialog)
+                        },
+                        onSelectSet = {
+                            onScreenAction(CollectionScreenAction.NavigateToSet(it))
+                        },
                         onCheckSet = { },
                         onClickSort = { },
                         onDeleteSelectedSets = { },
@@ -147,6 +152,22 @@ private fun MainContent(
                     )
                 }
             }
+        }
+
+        if (state.showCreateSetDialog) {
+            CreateSetDialog(
+                onConfirm = { name ->
+                    onScreenAction(
+                        CollectionScreenAction.CreateSet(
+                            name = name,
+                            description = null
+                        )
+                    )
+                },
+                onDismiss = {
+                    onScreenAction(CollectionScreenAction.DismissCreateSetDialog)
+                }
+            )
         }
     }
 }

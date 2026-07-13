@@ -9,11 +9,13 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.util.getPlatform
 import collections.data.local.converter.Converters
 import collections.data.local.dao.CoinDetailsDao
+import collections.data.local.dao.CoinSetDao
 import collections.data.local.dao.CollectionStatsDao
 import collections.data.local.entity.AiAnalysisEntity
 import collections.data.local.entity.CatalogueNumberEntity
 import collections.data.local.entity.CoinDataEntity
 import collections.data.local.entity.CoinDetailsEntity
+import collections.data.local.entity.CoinSetEntity
 import collections.data.local.entity.CollectionHighlightsEntity
 import collections.data.local.entity.CollectionStatsEntity
 import feed.data.local.dao.CoinListingDao
@@ -36,8 +38,9 @@ import user.data.local.entity.UserEntity
         CatalogueNumberEntity::class,
         CollectionStatsEntity::class,
         CollectionHighlightsEntity::class,
+        CoinSetEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -49,6 +52,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun coinListingDao(): CoinListingDao
     abstract fun coinDetailsDao(): CoinDetailsDao
     abstract fun collectionStatsDao(): CollectionStatsDao
+    abstract fun coinSetDao(): CoinSetDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
