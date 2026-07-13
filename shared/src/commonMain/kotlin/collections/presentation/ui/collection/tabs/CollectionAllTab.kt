@@ -37,12 +37,12 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import app.presentation.components.EmptyContent
-import app.presentation.components.MultiSelectionAction
-import app.presentation.components.MultiSelectionActionBar
-import app.presentation.components.MultiSelectionContainer
 import app.presentation.util.calculateGridConfig
 import collections.domain.model.Coin
 import collections.presentation.components.CoinItem
+import collections.presentation.components.MultiSelectionAction
+import collections.presentation.components.MultiSelectionActionBar
+import collections.presentation.components.MultiSelectionContainer
 import collections.presentation.ui.collection.CollectionState
 import mintmind.shared.generated.resources.Res
 import mintmind.shared.generated.resources.collection_filter

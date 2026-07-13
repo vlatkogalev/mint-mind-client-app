@@ -32,11 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import app.presentation.components.EmptyContent
-import app.presentation.components.MultiSelectionAction
-import app.presentation.components.MultiSelectionActionBar
-import app.presentation.components.MultiSelectionContainer
 import app.presentation.util.calculateGridConfig
 import collections.domain.model.CoinSet
+import collections.presentation.components.MultiSelectionAction
+import collections.presentation.components.MultiSelectionActionBar
+import collections.presentation.components.MultiSelectionContainer
 import collections.presentation.components.SetItem
 import collections.presentation.ui.collection.CollectionState
 import mintmind.shared.generated.resources.Res

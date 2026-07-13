@@ -1,4 +1,4 @@
-package app.presentation.components
+package collections.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,12 +17,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.presentation.theme.AppTheme
 
 @Composable
 fun MultiSelectionAction(
     onClick: () -> Unit,
     enabled: Boolean,
-    color: Color = MaterialTheme.colorScheme.onSurface,
+    color: Color = MaterialTheme.colorScheme.primary,
     icon: ImageVector,
     label: String
 ) {
@@ -51,11 +52,13 @@ fun MultiSelectionAction(
 @Preview
 @Composable
 private fun MultiSelectionActionPreview() {
-    MultiSelectionAction(
-        onClick = { },
-        enabled = true,
-        color = MaterialTheme.colorScheme.error,
-        icon = Icons.Outlined.Delete,
-        label = "Delete"
-    )
+    AppTheme {
+        MultiSelectionAction(
+            onClick = { },
+            enabled = true,
+            color = MaterialTheme.colorScheme.error,
+            icon = Icons.Outlined.Delete,
+            label = "Delete"
+        )
+    }
 }
