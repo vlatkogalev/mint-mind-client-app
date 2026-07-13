@@ -2,6 +2,7 @@ package collections.presentation.ui.collection.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,8 +16,10 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Feed
 import androidx.compose.material.icons.outlined.Checklist
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.FormatLineSpacing
+import androidx.compose.material.icons.outlined.MoveDown
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
@@ -34,12 +37,17 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemKey
 import app.presentation.components.EmptyContent
+import app.presentation.components.MultiSelectionAction
+import app.presentation.components.MultiSelectionActionBar
+import app.presentation.components.MultiSelectionContainer
 import app.presentation.util.calculateGridConfig
 import collections.domain.model.Coin
 import collections.presentation.components.CoinItem
 import collections.presentation.ui.collection.CollectionState
 import mintmind.shared.generated.resources.Res
 import mintmind.shared.generated.resources.collection_filter
+import mintmind.shared.generated.resources.collection_move_item
+import mintmind.shared.generated.resources.collection_remove_item
 import mintmind.shared.generated.resources.collection_sort
 import mintmind.shared.generated.resources.feed_empty_listing_text
 import mintmind.shared.generated.resources.feed_empty_listing_title
@@ -51,7 +59,7 @@ fun CollectionAllTab(
     coins: LazyPagingItems<Coin>,
     onIdentifyCoin: () -> Unit,
     onSelectCoin: (id: String) -> Unit,
-    onCheckCoin: (coin: Coin) -> Unit,
+    onCheckCoin: (id: String) -> Unit,
     onClickFilter: () -> Unit,
     onClickSort: () -> Unit,
     onDeleteSelectedCoins: () -> Unit,
@@ -61,37 +69,58 @@ fun CollectionAllTab(
     val windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
     val gridConfig = windowSizeClass.calculateGridConfig(1, 2, 3)
 
-    LazyVerticalGrid(
-        columns = gridConfig.gridCells,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(bottom = 32.dp),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        stickyHeader {
-            CoinsToolbar(
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            columns = gridConfig.gridCells,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 96.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            stickyHeader {
+                CoinsToolbar(
+                    isMultiSelectEnabled = state.isCoinMultiSelectModeEnabled,
+                    onClickFilter = onClickFilter,
+                    onClickSort = onClickSort,
+                    onToggleMultiSelect = onCoinMultiSelectionModeEnabled,
+                )
+            }
+
+            if (coins.loadState.refresh is LoadState.Loading) {
+                loadingIndicator()
+            }
+
+            coinItems(
+                coins = coins,
                 isMultiSelectEnabled = state.isCoinMultiSelectModeEnabled,
-                onClickFilter = onClickFilter,
-                onClickSort = onClickSort,
-                onToggleMultiSelect = onCoinMultiSelectionModeEnabled,
+                selectedCoinIds = state.selectedCoinIds,
+                onSelectCoin = onSelectCoin,
+                onToggleSelected = onCheckCoin,
             )
+
+            if (coins.loadState.refresh is LoadState.NotLoading && coins.itemSnapshotList.isEmpty()) {
+                emptyState()
+            }
+
+            if (coins.loadState.append is LoadState.Loading) {
+                loadingIndicator()
+            }
         }
 
-        if (coins.loadState.refresh is LoadState.Loading) {
-            loadingIndicator()
-        }
-
-        coinItems(
-            coins = coins,
-            onSelectCoin = onSelectCoin,
-        )
-
-        if (coins.loadState.refresh is LoadState.NotLoading && coins.itemSnapshotList.isEmpty()) {
-            emptyState()
-        }
-
-        if (coins.loadState.append is LoadState.Loading) {
-            loadingIndicator()
+        MultiSelectionActionBar(isEnabled = state.isCoinMultiSelectModeEnabled) {
+            MultiSelectionAction(
+                onClick = onDeleteSelectedCoins,
+                enabled = state.selectedCoinIds.isNotEmpty(),
+                color = MaterialTheme.colorScheme.error,
+                icon = Icons.Outlined.Delete,
+                label = stringResource(Res.string.collection_remove_item),
+            )
+            MultiSelectionAction(
+                onClick = onMoveSelectedCoins,
+                enabled = state.selectedCoinIds.isNotEmpty(),
+                icon = Icons.Outlined.MoveDown,
+                label = stringResource(Res.string.collection_move_item),
+            )
         }
     }
 }
@@ -147,16 +176,31 @@ private fun CoinsToolbar(
 
 private fun LazyGridScope.coinItems(
     coins: LazyPagingItems<Coin>,
+    isMultiSelectEnabled: Boolean,
+    selectedCoinIds: Set<String>,
     onSelectCoin: (id: String) -> Unit,
+    onToggleSelected: (id: String) -> Unit,
 ) {
     items(count = coins.itemCount, key = coins.itemKey { it.id }) { index ->
         val coin = coins[index]
         if (coin != null) {
-            CoinItem(
-                coin = coin,
+            MultiSelectionContainer(
+                isEnabled = isMultiSelectEnabled,
+                isSelected = coin.id in selectedCoinIds,
+                onClick = {
+                    if (isMultiSelectEnabled) onToggleSelected(coin.id) else onSelectCoin(coin.id)
+                },
+                onCheckedChange = { onToggleSelected(coin.id) },
                 modifier = Modifier.width(320.dp).animateItem(),
-                onClick = { onSelectCoin(coin.id) }
-            )
+            ) {
+                CoinItem(
+                    coin = coin,
+                    modifier = Modifier,
+                    onClick = {
+                        if (isMultiSelectEnabled) onToggleSelected(coin.id) else onSelectCoin(coin.id)
+                    },
+                )
+            }
         }
     }
 }

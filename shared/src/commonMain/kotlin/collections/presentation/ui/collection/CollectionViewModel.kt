@@ -66,6 +66,56 @@ class CollectionViewModel(
                 }
             }
 
+            is CollectionScreenAction.ToggleCoinMultiSelectMode -> {
+                val enabled = !_state.value.isCoinMultiSelectModeEnabled
+                _state.value = _state.value.copy(
+                    isCoinMultiSelectModeEnabled = enabled,
+                    selectedCoinIds = if (enabled) _state.value.selectedCoinIds else emptySet(),
+                )
+            }
+
+            is CollectionScreenAction.ToggleCoinSelected -> {
+                val current = _state.value.selectedCoinIds
+                val updated =
+                    if (action.coinId in current) current - action.coinId else current + action.coinId
+                _state.value = _state.value.copy(selectedCoinIds = updated)
+            }
+
+            is CollectionScreenAction.DeleteSelectedCoins -> {
+                // TODO: wire to data layer (delete selected coins)
+                _state.value = _state.value.copy(
+                    isCoinMultiSelectModeEnabled = false,
+                    selectedCoinIds = emptySet(),
+                )
+            }
+
+            is CollectionScreenAction.MoveSelectedCoins -> {
+                // TODO: wire to data layer (move selected coins to a set)
+            }
+
+            is CollectionScreenAction.ToggleSetMultiSelectMode -> {
+                val enabled = !_state.value.isSetMultiSelectModeEnabled
+                _state.value = _state.value.copy(
+                    isSetMultiSelectModeEnabled = enabled,
+                    selectedSetIds = if (enabled) _state.value.selectedSetIds else emptySet(),
+                )
+            }
+
+            is CollectionScreenAction.ToggleSetSelected -> {
+                val current = _state.value.selectedSetIds
+                val updated =
+                    if (action.setId in current) current - action.setId else current + action.setId
+                _state.value = _state.value.copy(selectedSetIds = updated)
+            }
+
+            is CollectionScreenAction.DeleteSelectedSets -> {
+                // TODO: wire to data layer (delete selected sets)
+                _state.value = _state.value.copy(
+                    isSetMultiSelectModeEnabled = false,
+                    selectedSetIds = emptySet(),
+                )
+            }
+
             else -> Unit
         }
     }

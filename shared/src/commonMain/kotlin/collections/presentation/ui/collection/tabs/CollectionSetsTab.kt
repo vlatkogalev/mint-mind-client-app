@@ -2,6 +2,7 @@ package collections.presentation.ui.collection.tabs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.CreateNewFolder
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FormatLineSpacing
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
@@ -30,6 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import app.presentation.components.EmptyContent
+import app.presentation.components.MultiSelectionAction
+import app.presentation.components.MultiSelectionActionBar
+import app.presentation.components.MultiSelectionContainer
 import app.presentation.util.calculateGridConfig
 import collections.domain.model.CoinSet
 import collections.presentation.components.SetItem
@@ -38,6 +43,7 @@ import mintmind.shared.generated.resources.Res
 import mintmind.shared.generated.resources.collection_create_set
 import mintmind.shared.generated.resources.collection_empty_set_desc
 import mintmind.shared.generated.resources.collection_empty_set_title
+import mintmind.shared.generated.resources.collection_remove_item
 import mintmind.shared.generated.resources.collection_sort
 import org.jetbrains.compose.resources.stringResource
 
@@ -46,7 +52,7 @@ fun CollectionSetsTab(
     state: CollectionState,
     onClickCreateNewSet: () -> Unit,
     onSelectSet: (id: String) -> Unit,
-    onCheckSet: (set: CoinSet) -> Unit,
+    onCheckSet: (id: String) -> Unit,
     onClickSort: () -> Unit,
     onDeleteSelectedSets: () -> Unit,
     onSetMultiSelectionModeEnabled: () -> Unit,
@@ -54,28 +60,43 @@ fun CollectionSetsTab(
     val windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
     val gridConfig = windowSizeClass.calculateGridConfig(1, 2, 3)
 
-    LazyVerticalGrid(
-        columns = gridConfig.gridCells,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(bottom = 32.dp),
-        modifier = Modifier.fillMaxSize()
-    ) {
-        stickyHeader {
-            SetsHeader(
-                isMultiSelectEnabled = state.isSetMultiSelectModeEnabled,
-                onClickCreateNewSet = onClickCreateNewSet,
-                onClickSort = onClickSort,
-                onToggleMultiSelect = onSetMultiSelectionModeEnabled,
-            )
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            columns = gridConfig.gridCells,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(bottom = 96.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            stickyHeader {
+                SetsHeader(
+                    isMultiSelectEnabled = state.isSetMultiSelectModeEnabled,
+                    onClickCreateNewSet = onClickCreateNewSet,
+                    onClickSort = onClickSort,
+                    onToggleMultiSelect = onSetMultiSelectionModeEnabled,
+                )
+            }
+
+            if (state.sets.isEmpty()) {
+                emptyState()
+            } else {
+                setItems(
+                    sets = state.sets,
+                    isMultiSelectEnabled = state.isSetMultiSelectModeEnabled,
+                    selectedSetIds = state.selectedSetIds,
+                    onSelectSet = onSelectSet,
+                    onToggleSelected = onCheckSet,
+                )
+            }
         }
 
-        if (state.sets.isEmpty()) {
-            emptyState()
-        } else {
-            setItems(
-                sets = state.sets,
-                onSelectSet = onSelectSet,
+        MultiSelectionActionBar(isEnabled = state.isSetMultiSelectModeEnabled) {
+            MultiSelectionAction(
+                onClick = onDeleteSelectedSets,
+                enabled = state.selectedSetIds.isNotEmpty(),
+                color = MaterialTheme.colorScheme.error,
+                icon = Icons.Outlined.Delete,
+                label = stringResource(Res.string.collection_remove_item),
             )
         }
     }
@@ -174,17 +195,32 @@ private fun LazyGridScope.emptyState() {
 
 private fun LazyGridScope.setItems(
     sets: List<CoinSet>,
+    isMultiSelectEnabled: Boolean,
+    selectedSetIds: Set<String>,
     onSelectSet: (id: String) -> Unit,
+    onToggleSelected: (id: String) -> Unit,
 ) {
     items(
         count = sets.size,
         key = { index -> sets[index].id }
     ) { index ->
         val set = sets[index]
-        SetItem(
-            set = set,
+        MultiSelectionContainer(
+            isEnabled = isMultiSelectEnabled,
+            isSelected = set.id in selectedSetIds,
+            onClick = {
+                if (isMultiSelectEnabled) onToggleSelected(set.id) else onSelectSet(set.id)
+            },
+            onCheckedChange = { onToggleSelected(set.id) },
             modifier = Modifier.width(320.dp).animateItem(),
-            onClick = { onSelectSet(set.id) }
-        )
+        ) {
+            SetItem(
+                set = set,
+                modifier = Modifier,
+                onClick = {
+                    if (isMultiSelectEnabled) onToggleSelected(set.id) else onSelectSet(set.id)
+                },
+            )
+        }
     }
 }

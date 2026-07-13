@@ -127,12 +127,12 @@ private fun MainContent(
                         coins = coins,
                         onIdentifyCoin = { },
                         onSelectCoin = { onScreenAction(CollectionScreenAction.NavigateToCoin(it)) },
-                        onCheckCoin = { },
+                        onCheckCoin = { onScreenAction(CollectionScreenAction.ToggleCoinSelected(it)) },
                         onClickFilter = { },
                         onClickSort = { },
-                        onDeleteSelectedCoins = { },
-                        onMoveSelectedCoins = { },
-                        onCoinMultiSelectionModeEnabled = { },
+                        onDeleteSelectedCoins = { onScreenAction(CollectionScreenAction.DeleteSelectedCoins) },
+                        onMoveSelectedCoins = { onScreenAction(CollectionScreenAction.MoveSelectedCoins) },
+                        onCoinMultiSelectionModeEnabled = { onScreenAction(CollectionScreenAction.ToggleCoinMultiSelectMode) },
                     )
                 }
 
@@ -145,10 +145,10 @@ private fun MainContent(
                         onSelectSet = {
                             onScreenAction(CollectionScreenAction.NavigateToSet(it))
                         },
-                        onCheckSet = { },
+                        onCheckSet = { onScreenAction(CollectionScreenAction.ToggleSetSelected(it)) },
                         onClickSort = { },
-                        onDeleteSelectedSets = { },
-                        onSetMultiSelectionModeEnabled = { },
+                        onDeleteSelectedSets = { onScreenAction(CollectionScreenAction.DeleteSelectedSets) },
+                        onSetMultiSelectionModeEnabled = { onScreenAction(CollectionScreenAction.ToggleSetMultiSelectMode) },
                     )
                 }
             }
