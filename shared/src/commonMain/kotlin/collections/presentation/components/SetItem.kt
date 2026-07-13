@@ -7,33 +7,48 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.center
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.presentation.theme.AppTheme
+import app.util.epochMilliToDateRange
 import coil3.compose.AsyncImage
 import collections.domain.model.CoinSet
 import mintmind.shared.generated.resources.Res
 import mintmind.shared.generated.resources.coin_placeholder
+import mintmind.shared.generated.resources.collection_last_updated
+import mintmind.shared.generated.resources.collection_set_coin_count
+import mintmind.shared.generated.resources.collection_set_empty
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 
-private const val MAX_PREVIEWS = 3
+private const val MAX_PREVIEWS = 5
+private val COIN_SIZE = 60.dp
 
 @Composable
 fun SetItem(
@@ -45,41 +60,53 @@ fun SetItem(
         colors = CardDefaults.outlinedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         ),
-        modifier = modifier.height(132.dp)
+        modifier = modifier
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        Column(
             modifier = Modifier
-                .fillMaxSize()
                 .clickable { onClick(set.id) }
-                .padding(8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            SetPreviews(
-                previewUrls = set.previewObverseUrls,
-                modifier = Modifier.weight(1f)
-            )
+            SetPreviews(previewUrls = set.previewObverseUrls)
 
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.fillMaxHeight().weight(1f)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = set.name,
-                    style = MaterialTheme.typography.labelMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = "${set.coinCount}",
-                    style = MaterialTheme.typography.titleSmall,
+                    text = pluralStringResource(
+                        Res.plurals.collection_set_coin_count,
+                        set.coinCount,
+                        set.coinCount
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.fillMaxWidth()
+                    color = MaterialTheme.colorScheme.tertiary
                 )
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = set.name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = "${stringResource(Res.string.collection_last_updated)} ${set.createdAt.epochMilliToDateRange()}",
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                fontWeight = FontWeight.Light,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
@@ -89,44 +116,76 @@ private fun SetPreviews(
     previewUrls: List<String>,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier.fillMaxHeight()
+    if (previewUrls.isEmpty()) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = modifier
+                .fillMaxWidth()
+                .height(COIN_SIZE)
+        ) {
+            Text(
+                text = stringResource(Res.string.collection_set_empty),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Light
+            )
+        }
+        return
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(COIN_SIZE)
+            // Offscreen compositing is required for BlendMode.Clear to punch
+            // through only this layer instead of everything behind it.
+            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
     ) {
-        val previews = previewUrls.take(MAX_PREVIEWS)
-        if (previews.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .aspectRatio(1f)
-                    .clip(CircleShape)
-                    .weight(1f)
+        var offset = 0.dp
+        previewUrls.take(MAX_PREVIEWS).forEach { url ->
+            SetObject(
+                strokeWidth = 10f,
+                ringColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                modifier = Modifier.offset(x = offset)
             ) {
                 AsyncImage(
-                    model = null,
+                    model = url,
                     contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
+                    contentScale = ContentScale.Crop,
                     placeholder = painterResource(Res.drawable.coin_placeholder),
                     error = painterResource(Res.drawable.coin_placeholder),
                     modifier = Modifier.fillMaxSize()
                 )
             }
-        } else {
-            previews.forEach { url ->
-                AsyncImage(
-                    model = url,
-                    contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
-                    placeholder = painterResource(Res.drawable.coin_placeholder),
-                    error = painterResource(Res.drawable.coin_placeholder),
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(1f)
-                        .clip(CircleShape)
-                        .weight(1f)
+            offset += COIN_SIZE / 2
+        }
+    }
+}
+
+@Composable
+private fun SetObject(
+    strokeWidth: Float,
+    ringColor: Color,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .size(COIN_SIZE)
+            .drawWithContent {
+                drawContent()
+                // Punch a ring-shaped hole so the coin beneath shows through the
+                // gap, visually separating the overlapping discs.
+                drawCircle(
+                    color = ringColor,
+                    radius = size.minDimension / 2,
+                    center = size.center,
+                    style = Stroke(width = strokeWidth),
+                    blendMode = BlendMode.Clear
                 )
             }
-        }
+            .clip(CircleShape)
+    ) {
+        content()
     }
 }
 
@@ -144,9 +203,9 @@ private fun SetItemPreview() {
                     id = "1",
                     name = "Roman Empire",
                     description = "Ancient Roman coins",
-                    previewObverseUrls = emptyList(),
+                    previewObverseUrls = listOf("", "", "", "", ""),
                     coinCount = 12,
-                    createdAt = 0L
+                    createdAt = 1756131199000L
                 ),
                 modifier = Modifier,
                 onClick = { }
