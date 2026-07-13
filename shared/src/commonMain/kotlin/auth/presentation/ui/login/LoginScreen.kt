@@ -11,38 +11,32 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.CenterFocusStrong
 import androidx.compose.material.icons.outlined.MarkEmailRead
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_TYPE_NORMAL
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.presentation.components.AppTopBar
 import app.presentation.components.FormTextField
 import app.presentation.components.GeneralDialog
 import app.presentation.components.PrimaryButton
 import app.presentation.components.SecondaryButton
 import app.presentation.theme.AppTheme
-import app.presentation.theme.AppThemeExt
 import app.presentation.util.calculateAdaptiveWidth
 import app.presentation.util.cutoutAwarePadding
 import auth.presentation.components.PasswordTextField
@@ -58,7 +52,6 @@ import mintmind.shared.generated.resources.login_verification_text
 import mintmind.shared.generated.resources.login_verification_title
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     state: LoginState,
@@ -71,21 +64,9 @@ fun LoginScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { },
-                navigationIcon = {
-                    IconButton(onClick = { onScreenAction(LoginScreenAction.NavigateUp) }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, null)
-                    }
-                },
-                colors = TopAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-                    subtitleContentColor = AppThemeExt.colors.textSecondary
-                )
+            AppTopBar(
+                onNavigateUp = { onScreenAction(LoginScreenAction.NavigateUp) },
+                transparent = true,
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

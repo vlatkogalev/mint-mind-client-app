@@ -20,7 +20,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,7 +27,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
@@ -38,16 +36,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.presentation.components.AppTopBar
 import app.presentation.components.PrimaryButton
 import app.presentation.components.RedirectDialog
 import app.presentation.components.ReededDivider
 import app.presentation.components.SectionTitle
+import app.presentation.components.TopAppBarText
 import app.presentation.theme.AppTheme
 import app.presentation.theme.AppThemeExt
 import app.presentation.util.calculateGridConfig
@@ -76,21 +75,8 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(Res.string.app_name),
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background,
-                    navigationIconContentColor = MaterialTheme.colorScheme.tertiary,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                    actionIconContentColor = MaterialTheme.colorScheme.tertiary,
-                    subtitleContentColor = AppThemeExt.colors.textSecondary
-                ),
+            AppTopBar(
+                title = { TopAppBarText(text = stringResource(Res.string.app_name)) },
                 actions = {
                     IconButton(onClick = { onScreenAction(HomeScreenAction.NavigateToUser) }) {
                         Icon(
@@ -99,7 +85,8 @@ fun HomeScreen(
                         )
                     }
                 },
-                scrollBehavior = scrollBehavior
+                transparent = true,
+                scrollBehavior = scrollBehavior,
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },

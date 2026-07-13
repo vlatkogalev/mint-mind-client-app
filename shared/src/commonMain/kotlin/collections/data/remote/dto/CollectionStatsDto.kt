@@ -21,13 +21,13 @@ data class CollectionStatsDto(
     @Serializable
     data class Highlights(
         @SerialName("mostValuable")
-        val mostValuable: Coin,
+        val mostValuable: Coin?,
 
         @SerialName("mostAncient")
-        val mostAncient: Coin,
+        val mostAncient: Coin?,
 
         @SerialName("rarest")
-        val rarest: Coin
+        val rarest: Coin?
     ) {
         @Serializable
         data class Coin(

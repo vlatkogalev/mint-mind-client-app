@@ -11,19 +11,11 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Feed
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
@@ -31,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -41,8 +32,10 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import androidx.window.core.layout.WindowSizeClass
+import app.presentation.components.AppTopBar
 import app.presentation.components.EmptyContent
 import app.presentation.components.RedirectDialog
+import app.presentation.components.TopAppBarText
 import app.presentation.theme.AppTheme
 import app.presentation.util.calculateGridConfig
 import app.presentation.util.cutoutAwarePaddingValues
@@ -50,10 +43,11 @@ import feed.domain.model.CoinListing
 import feed.presentation.components.CoinListingItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import mintmind.shared.generated.resources.Res
+import mintmind.shared.generated.resources.coin_listings_screen_title
 import mintmind.shared.generated.resources.feed_empty_listing_text
 import mintmind.shared.generated.resources.feed_empty_listing_title
+import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoinListingsScreen(
     state: CoinListingsState,
@@ -69,22 +63,10 @@ fun CoinListingsScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(text = "Ebay Listings", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = { onScreenAction(CoinListingsScreenAction.NavigateUp) }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, null)
-                    }
-                },
-                colors = TopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background,
-                    navigationIconContentColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                    actionIconContentColor = MaterialTheme.colorScheme.primary,
-                    subtitleContentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-                ),
-                scrollBehavior = scrollBehavior
+            AppTopBar(
+                title = { TopAppBarText(text = stringResource(Res.string.coin_listings_screen_title)) },
+                onNavigateUp = { onScreenAction(CoinListingsScreenAction.NavigateUp) },
+                scrollBehavior = scrollBehavior,
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },

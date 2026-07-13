@@ -98,18 +98,62 @@
     <string name="collection_screen_title">Collection</string>
     <string name="collection_coins">Coins</string>
     <string name="collection_issuers">Issuers</string>
-    <string name="collection_total_value">Total Value</string>
+    <string name="collection_total_value">Collection value</string>
     <string name="collection_screen_summary">Summary</string>
     <string name="collection_screen_all">All</string>
     <string name="collection_screen_sets">Sets</string>
     <string name="collection_sort">Sort</string>
     <string name="collection_filter">Filter</string>
+    <string name="collection_most_valuable">Most Valuable</string>
+    <string name="collection_most_ancient">Most Ancient</string>
+    <string name="collection_rarest">Rarest</string>
+    <string name="collection_tab_summary">Summary</string>
+    <string name="collection_tab_all">All</string>
+    <string name="collection_tab_sets">Sets</string>
+    <string name="collection_create_set">Create New Set</string>
+    <string name="collection_set_name">Set Name</string>
+    <string name="collection_move_to">Move to...</string>
+    <string name="collection_clear_filters">Clear all</string>
+    <string name="collection_filter_issuers">Countries/Issuers</string>
+    <string name="collection_filter_denominations">Denominations</string>
+    <string name="collection_filter_estimated_grades">Estimated Grades</string>
+    <string name="collection_filter_years">Years</string>
+    <string name="collection_move_item">Move</string>
+    <string name="collection_remove_item">Delete</string>
+    <string name="collection_delete_coins_title">Delete Coins</string>
+    <string name="collection_delete_coins_text">Are you sure you want to delete the selected coins?</string>
+    <string name="collection_delete_sets_title">Delete Sets</string>
+    <string name="collection_delete_sets_text">Are you sure you want to delete the selected sets?</string>
+    <string name="collection_empty_collection_title">Empty collection</string>
+    <string name="collection_empty_collection_desc">You haven't collected any coins yet</string>
+    <string name="collection_empty_set_title">No sets</string>
+    <string name="collection_empty_set_desc">You haven't created any sets yet</string>
+    <plurals name="collection_coins_moved">
+        <item quantity="one">%1$d coin moved to %2$s set.</item>
+        <item quantity="other">%1$d coins moved to %2$s set.</item>
+    </plurals>
+    <plurals name="collection_coins_deleted">
+        <item quantity="one">%1$d coin deleted permanently.</item>
+        <item quantity="other">%1$d coins deleted permanently.</item>
+    </plurals>
+    <plurals name="collection_sets_deleted">
+        <item quantity="one">%1$d set deleted permanently.</item>
+        <item quantity="other">%1$d sets deleted permanently.</item>
+    </plurals>
+    <string name="collection_sort_value_high_to_low">Value: High to Low</string>
+    <string name="collection_sort_value_low_to_high">Value: Low to High</string>
+    <string name="collection_sort_release_old_to_new">Release Year: Old to New</string>
+    <string name="collection_sort_release_new_to_old">Release Year: New to Old</string>
+    <string name="collection_sort_date_old_to_new">Date Added: Old to New</string>
+    <string name="collection_sort_date_new_to_old">Date Added: New to Old</string>
 
     <!-- Feed -->
     <string name="feed_empty_feed_title">No news available</string>
     <string name="feed_empty_feed_text">There are no recent articles about coins right now.</string>
     <string name="feed_empty_listing_title">No coin listings found</string>
     <string name="feed_empty_listing_text">We couldn’t find any coin listings at the moment.</string>
+    <string name="news_feed_screen_title">Coin Talk</string>
+    <string name="coin_listings_screen_title">Ebay Listings</string>
 
     <!-- Coin Details -->
     <string name="coin_details_very_common">Very Common</string>

@@ -36,11 +36,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
+import app.presentation.components.AppTopBar
 import app.presentation.components.BottomBarButton
 import app.presentation.components.ConfirmDialog
 import app.presentation.components.FormTextField
-import app.presentation.components.MainTopAppBar
 import app.presentation.components.SectionTitle
+import app.presentation.components.TopAppBarText
 import app.presentation.theme.AppTheme
 import app.presentation.util.cutoutAwarePadding
 import auth.presentation.components.PasswordTextField
@@ -79,10 +80,10 @@ fun RegisterScreen(
 
     Scaffold(
         topBar = {
-            MainTopAppBar(
-                title = stringResource(Res.string.user_register_screen_title),
+            AppTopBar(
+                title = { TopAppBarText(text = stringResource(Res.string.user_register_screen_title)) },
+                onNavigateUp = { onScreenAction(RegisterScreenAction.NavigateUp) },
                 scrollBehavior = scrollBehavior,
-                onNavigateUp = { onScreenAction(RegisterScreenAction.NavigateUp) }
             )
         },
         bottomBar = {

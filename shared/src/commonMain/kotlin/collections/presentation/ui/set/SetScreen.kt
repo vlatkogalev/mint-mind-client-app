@@ -1,22 +1,14 @@
 package collections.presentation.ui.set
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import app.presentation.components.AppTopBar
 import app.presentation.theme.AppTheme
-import app.presentation.theme.AppThemeExt
 
 @Composable
 fun SetScreen(
@@ -26,21 +18,9 @@ fun SetScreen(
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { },
-                navigationIcon = {
-                    IconButton(onClick = { onScreenAction(SetScreenAction.NavigateUp) }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, null)
-                    }
-                },
-                colors = TopAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground,
-                    subtitleContentColor = AppThemeExt.colors.textSecondary
-                )
+            AppTopBar(
+                onNavigateUp = { onScreenAction(SetScreenAction.NavigateUp) },
+                transparent = true,
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

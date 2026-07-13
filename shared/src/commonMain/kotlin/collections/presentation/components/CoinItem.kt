@@ -90,7 +90,7 @@ fun CoinItem(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    text = "${coin.gradeName} (${coin.gradeAbbreviation})",
+                    text = "${coin.gradeName} (${coin.gradeAbbreviation}-${coin.gradeNumeric})",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.tertiary,
