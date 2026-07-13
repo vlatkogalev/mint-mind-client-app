@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Feed
@@ -68,82 +69,114 @@ fun CollectionAllTab(
         modifier = Modifier.fillMaxSize()
     ) {
         stickyHeader {
-            Row(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-                TextButton(onClick = { }) {
-                    Icon(
-                        imageVector = Icons.Outlined.FilterAlt,
-                        contentDescription = null
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = stringResource(Res.string.collection_filter))
-                }
-
-                TextButton(onClick = { }) {
-                    Icon(
-                        imageVector = Icons.Outlined.FormatLineSpacing,
-                        contentDescription = null
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = stringResource(Res.string.collection_sort))
-                }
-
-                Spacer(Modifier.weight(1f))
-
-                FilledIconToggleButton(
-                    checked = state.isCoinMultiSelectModeEnabled,
-                    onCheckedChange = { },
-                    colors = IconButtonDefaults.filledIconToggleButtonColors().copy(
-                        containerColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.onBackground
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Checklist,
-                        contentDescription = null,
-                        tint = if (state.isCoinMultiSelectModeEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
+            CoinsToolbar(
+                isMultiSelectEnabled = state.isCoinMultiSelectModeEnabled,
+                onClickFilter = onClickFilter,
+                onClickSort = onClickSort,
+                onToggleMultiSelect = onCoinMultiSelectionModeEnabled,
+            )
         }
 
         if (coins.loadState.refresh is LoadState.Loading) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                CircularProgressIndicator(
-                    modifier = Modifier.fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                )
-            }
+            loadingIndicator()
         }
 
-        items(count = coins.itemCount, key = coins.itemKey { it.id }) { index ->
-            val coin = coins[index]
-            if (coin != null) {
-                CoinItem(
-                    coin = coin,
-                    modifier = Modifier.width(320.dp).animateItem(),
-                    onClick = { onSelectCoin(coin.id) }
-                )
-            }
-        }
+        coinItems(
+            coins = coins,
+            onSelectCoin = onSelectCoin,
+        )
 
         if (coins.loadState.refresh is LoadState.NotLoading && coins.itemSnapshotList.isEmpty()) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                EmptyContent(
-                    icon = Icons.AutoMirrored.Outlined.Feed,
-                    title = Res.string.feed_empty_listing_title,
-                    text = Res.string.feed_empty_listing_text,
-                    modifier = Modifier
-                )
-            }
+            emptyState()
         }
 
         if (coins.loadState.append is LoadState.Loading) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                CircularProgressIndicator(
-                    modifier = Modifier.fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                )
-            }
+            loadingIndicator()
         }
+    }
+}
+
+@Composable
+private fun CoinsToolbar(
+    isMultiSelectEnabled: Boolean,
+    onClickFilter: () -> Unit,
+    onClickSort: () -> Unit,
+    onToggleMultiSelect: () -> Unit,
+) {
+    Row(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+        TextButton(onClick = onClickFilter) {
+            Icon(
+                imageVector = Icons.Outlined.FilterAlt,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = stringResource(Res.string.collection_filter))
+        }
+
+        TextButton(onClick = onClickSort) {
+            Icon(
+                imageVector = Icons.Outlined.FormatLineSpacing,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = stringResource(Res.string.collection_sort))
+        }
+
+        Spacer(Modifier.weight(1f))
+
+        FilledIconToggleButton(
+            checked = isMultiSelectEnabled,
+            onCheckedChange = { onToggleMultiSelect() },
+            colors = IconButtonDefaults.filledIconToggleButtonColors().copy(
+                containerColor = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onBackground
+            )
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Checklist,
+                contentDescription = null,
+                tint = if (isMultiSelectEnabled) {
+                    MaterialTheme.colorScheme.onPrimary
+                } else {
+                    MaterialTheme.colorScheme.primary
+                }
+            )
+        }
+    }
+}
+
+private fun LazyGridScope.coinItems(
+    coins: LazyPagingItems<Coin>,
+    onSelectCoin: (id: String) -> Unit,
+) {
+    items(count = coins.itemCount, key = coins.itemKey { it.id }) { index ->
+        val coin = coins[index]
+        if (coin != null) {
+            CoinItem(
+                coin = coin,
+                modifier = Modifier.width(320.dp).animateItem(),
+                onClick = { onSelectCoin(coin.id) }
+            )
+        }
+    }
+}
+
+private fun LazyGridScope.loadingIndicator() {
+    item(span = { GridItemSpan(maxLineSpan) }) {
+        CircularProgressIndicator(
+            modifier = Modifier.fillMaxWidth()
+                .wrapContentWidth(Alignment.CenterHorizontally)
+        )
+    }
+}
+
+private fun LazyGridScope.emptyState() {
+    item(span = { GridItemSpan(maxLineSpan) }) {
+        EmptyContent(
+            icon = Icons.AutoMirrored.Outlined.Feed,
+            title = Res.string.feed_empty_listing_title,
+            text = Res.string.feed_empty_listing_text,
+            modifier = Modifier
+        )
     }
 }

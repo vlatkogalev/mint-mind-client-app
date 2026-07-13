@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
@@ -40,6 +41,7 @@ import mintmind.shared.generated.resources.collection_most_valuable
 import mintmind.shared.generated.resources.collection_rarest
 import mintmind.shared.generated.resources.identify_coin_side_obverse
 import mintmind.shared.generated.resources.identify_coin_side_reverse
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -58,85 +60,60 @@ fun CollectionSummaryTab(
         contentPadding = PaddingValues(bottom = 32.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-        state.highlights?.let { coins ->
-            for (coin in coins) {
-                when (coin.type) {
-                    CollectionStats.HighlightType.MOST_VALUABLE -> {
-                        item {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.clickable(
-                                    onClick = { onSelectCoin(coin.coinId) },
-                                )
-                            ) {
-                                BestObjectItem(
-                                    name = coin.denomination,
-                                    countryOrIssuer = coin.countryOrIssuer,
-                                    obverseImagePath = coin.obverseUrl,
-                                    reverseImagePath = coin.reverseUrl,
-                                    value = "$${coin.estimatedValueMean}",
-                                    label = stringResource(Res.string.collection_most_valuable)
-                                )
+        highlightItems(
+            highlights = state.highlights,
+            showDivider = gridConfig.columnCount <= 2,
+            onSelectCoin = onSelectCoin,
+        )
+    }
+}
 
-                                if (gridConfig.columnCount <= 2) {
-                                    ReededDivider()
-                                }
-                            }
-                        }
-                    }
+private fun LazyGridScope.highlightItems(
+    highlights: List<CollectionStats.HighlightedCoin>?,
+    showDivider: Boolean,
+    onSelectCoin: (id: String) -> Unit,
+) {
+    highlights ?: return
 
-                    CollectionStats.HighlightType.MOST_ANCIENT -> {
-                        item {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.clickable(
-                                    onClick = { onSelectCoin(coin.coinId) },
-                                )
-                            ) {
-                                BestObjectItem(
-                                    name = coin.denomination,
-                                    countryOrIssuer = coin.countryOrIssuer,
-                                    obverseImagePath = coin.obverseUrl,
-                                    reverseImagePath = coin.reverseUrl,
-                                    value = coin.year?.toString(),
-                                    label = stringResource(Res.string.collection_most_ancient)
-                                )
+    items(
+        count = highlights.size,
+        key = { index -> highlights[index].type }
+    ) { index ->
+        val coin = highlights[index]
 
-                                if (gridConfig.columnCount <= 2) {
-                                    ReededDivider()
-                                }
-                            }
-                        }
-                    }
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.clickable(onClick = { onSelectCoin(coin.coinId) })
+        ) {
+            BestObjectItem(
+                name = coin.denomination,
+                countryOrIssuer = coin.countryOrIssuer,
+                obverseImagePath = coin.obverseUrl,
+                reverseImagePath = coin.reverseUrl,
+                value = coin.highlightValue(),
+                label = stringResource(coin.type.labelRes())
+            )
 
-                    CollectionStats.HighlightType.RAREST -> {
-                        item {
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.clickable(
-                                    onClick = { onSelectCoin(coin.coinId) },
-                                )
-                            ) {
-                                BestObjectItem(
-                                    name = coin.denomination,
-                                    countryOrIssuer = coin.countryOrIssuer,
-                                    obverseImagePath = coin.obverseUrl,
-                                    reverseImagePath = coin.reverseUrl,
-                                    value = coin.mintage.toString(),
-                                    label = stringResource(Res.string.collection_rarest)
-                                )
-
-                                if (gridConfig.columnCount <= 2) {
-                                    ReededDivider()
-                                }
-                            }
-                        }
-                    }
-                }
+            if (showDivider) {
+                ReededDivider()
             }
         }
     }
 }
+
+private fun CollectionStats.HighlightedCoin.highlightValue(): String? =
+    when (type) {
+        CollectionStats.HighlightType.MOST_VALUABLE -> "$$estimatedValueMean"
+        CollectionStats.HighlightType.MOST_ANCIENT -> year?.toString()
+        CollectionStats.HighlightType.RAREST -> mintage.toString()
+    }
+
+private fun CollectionStats.HighlightType.labelRes(): StringResource =
+    when (this) {
+        CollectionStats.HighlightType.MOST_VALUABLE -> Res.string.collection_most_valuable
+        CollectionStats.HighlightType.MOST_ANCIENT -> Res.string.collection_most_ancient
+        CollectionStats.HighlightType.RAREST -> Res.string.collection_rarest
+    }
 
 @Composable
 private fun BestObjectItem(
