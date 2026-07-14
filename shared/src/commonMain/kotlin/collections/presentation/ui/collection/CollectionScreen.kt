@@ -115,8 +115,7 @@ private fun MainContent(
                 CollectionScreenType.SUMMARY -> {
                     CollectionSummaryTab(
                         state = state,
-                        onIdentifyCoin = { },
-                        onSelectCoin = { onScreenAction(CollectionScreenAction.NavigateToCoin(it)) },
+                        onAction = onScreenAction,
                     )
                 }
 

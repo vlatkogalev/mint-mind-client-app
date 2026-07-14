@@ -34,6 +34,7 @@ import app.presentation.theme.AppThemeExt
 import app.presentation.util.calculateGridConfig
 import coil3.compose.AsyncImage
 import collections.domain.model.CollectionStats
+import collections.presentation.ui.collection.CollectionScreenAction
 import collections.presentation.ui.collection.CollectionState
 import mintmind.shared.generated.resources.Res
 import mintmind.shared.generated.resources.collection_most_ancient
@@ -47,8 +48,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun CollectionSummaryTab(
     state: CollectionState,
-    onIdentifyCoin: () -> Unit,
-    onSelectCoin: (id: String) -> Unit,
+    onAction: (CollectionScreenAction) -> Unit,
 ) {
     val windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
     val gridConfig = windowSizeClass.calculateGridConfig(1, 2, 3)
@@ -63,7 +63,7 @@ fun CollectionSummaryTab(
         highlightItems(
             highlights = state.highlights,
             showDivider = gridConfig.columnCount <= 2,
-            onSelectCoin = onSelectCoin,
+            onAction = onAction,
         )
     }
 }
@@ -71,7 +71,7 @@ fun CollectionSummaryTab(
 private fun LazyGridScope.highlightItems(
     highlights: List<CollectionStats.HighlightedCoin>?,
     showDivider: Boolean,
-    onSelectCoin: (id: String) -> Unit,
+    onAction: (CollectionScreenAction) -> Unit,
 ) {
     highlights ?: return
 
@@ -83,7 +83,13 @@ private fun LazyGridScope.highlightItems(
 
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.clickable(onClick = { onSelectCoin(coin.coinId) })
+            modifier = Modifier.clickable(onClick = {
+                onAction(
+                    CollectionScreenAction.NavigateToCoin(
+                        coin.coinId
+                    )
+                )
+            })
         ) {
             BestObjectItem(
                 name = coin.denomination,
