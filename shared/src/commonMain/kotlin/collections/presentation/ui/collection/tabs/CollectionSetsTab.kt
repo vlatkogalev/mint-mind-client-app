@@ -19,6 +19,7 @@ import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.CreateNewFolder
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FormatLineSpacing
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -41,7 +42,10 @@ import collections.presentation.components.SetItem
 import collections.presentation.ui.collection.CollectionScreenAction
 import collections.presentation.ui.collection.CollectionState
 import mintmind.shared.generated.resources.Res
+import mintmind.shared.generated.resources.cancel
 import mintmind.shared.generated.resources.collection_create_set
+import mintmind.shared.generated.resources.collection_delete_sets_text
+import mintmind.shared.generated.resources.collection_delete_sets_title
 import mintmind.shared.generated.resources.collection_empty_set_desc
 import mintmind.shared.generated.resources.collection_empty_set_title
 import mintmind.shared.generated.resources.collection_remove_item
@@ -87,14 +91,46 @@ fun CollectionSetsTab(
 
         MultiSelectionActionBar(isEnabled = state.isSetMultiSelectModeEnabled) {
             MultiSelectionAction(
-                onClick = { onAction(CollectionScreenAction.DeleteSelectedSets) },
-                enabled = state.selectedSets.isNotEmpty(),
+                onClick = { onAction(CollectionScreenAction.RequestDeleteSelectedSets) },
+                enabled = state.selectedSets.isNotEmpty() && !state.isProcessingBulkAction,
                 color = MaterialTheme.colorScheme.error,
                 icon = Icons.Outlined.Delete,
                 label = stringResource(Res.string.collection_remove_item),
             )
         }
+
+        if (state.showDeleteSetsDialog) {
+            DeleteSetsDialog(
+                onConfirm = { onAction(CollectionScreenAction.ConfirmDeleteSelectedSets) },
+                onDismiss = { onAction(CollectionScreenAction.DismissDeleteDialog) },
+            )
+        }
     }
+}
+
+@Composable
+private fun DeleteSetsDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(Res.string.collection_delete_sets_title)) },
+        text = { Text(text = stringResource(Res.string.collection_delete_sets_text)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(
+                    text = stringResource(Res.string.collection_remove_item),
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(Res.string.cancel))
+            }
+        }
+    )
 }
 
 @Composable

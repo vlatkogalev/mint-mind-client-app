@@ -21,7 +21,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,9 +41,15 @@ import collections.presentation.components.StatsToolbar
 import collections.presentation.ui.collection.tabs.CollectionAllTab
 import collections.presentation.ui.collection.tabs.CollectionSetsTab
 import collections.presentation.ui.collection.tabs.CollectionSummaryTab
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import mintmind.shared.generated.resources.Res
+import mintmind.shared.generated.resources.collection_coins_deleted
+import mintmind.shared.generated.resources.collection_coins_moved
+import mintmind.shared.generated.resources.collection_sets_deleted
 import mintmind.shared.generated.resources.collection_total_value
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 private val CollectionScreenEntries = CollectionScreenType.entries
@@ -49,9 +58,53 @@ private val CollectionScreenEntries = CollectionScreenType.entries
 fun CollectionScreen(
     state: CollectionState,
     coins: LazyPagingItems<Coin>,
+    events: Flow<CollectionEvent>,
     snackbarHostState: SnackbarHostState,
     onScreenAction: (CollectionScreenAction) -> Unit,
 ) {
+    var currentEvent by remember { mutableStateOf<CollectionEvent?>(null) }
+
+    LaunchedEffect(Unit) {
+        events.collect { currentEvent = it }
+    }
+
+    currentEvent?.let { event ->
+        val message = when (event) {
+            is CollectionEvent.CoinsDeleted -> {
+                pluralStringResource(
+                    Res.plurals.collection_coins_deleted,
+                    event.count,
+                    event.count
+                )
+            }
+
+            is CollectionEvent.SetsDeleted -> {
+                pluralStringResource(
+                    Res.plurals.collection_sets_deleted,
+                    event.count,
+                    event.count
+                )
+            }
+
+            is CollectionEvent.CoinsMoved -> {
+                pluralStringResource(
+                    Res.plurals.collection_coins_moved,
+                    event.count,
+                    event.count,
+                    event.setName
+                )
+            }
+
+            is CollectionEvent.Error -> "An error occurred. Please try again."
+
+            is CollectionEvent.BulkActionBlocked -> event.reason
+        }
+
+        LaunchedEffect(event) {
+            snackbarHostState.showSnackbar(message)
+            currentEvent = null
+        }
+    }
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
@@ -203,6 +256,7 @@ private fun CollectionScreenPreview() {
                 selectedScreenType = CollectionScreenType.ALL
             ),
             coins = lazyPagingItems,
+            events = emptyFlow(),
             snackbarHostState = remember { SnackbarHostState() },
             onScreenAction = {}
         )

@@ -8,13 +8,17 @@ import androidx.room.TypeConverters
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import app.util.getPlatform
 import collections.data.local.converter.Converters
+import collections.data.local.dao.CoinDao
 import collections.data.local.dao.CoinDetailsDao
+import collections.data.local.dao.CoinPagingStateDao
 import collections.data.local.dao.CoinSetDao
 import collections.data.local.dao.CollectionStatsDao
 import collections.data.local.entity.AiAnalysisEntity
 import collections.data.local.entity.CatalogueNumberEntity
 import collections.data.local.entity.CoinDataEntity
 import collections.data.local.entity.CoinDetailsEntity
+import collections.data.local.entity.CoinEntity
+import collections.data.local.entity.CoinPagingStateEntity
 import collections.data.local.entity.CoinSetEntity
 import collections.data.local.entity.CollectionHighlightsEntity
 import collections.data.local.entity.CollectionStatsEntity
@@ -39,8 +43,10 @@ import user.data.local.entity.UserEntity
         CollectionStatsEntity::class,
         CollectionHighlightsEntity::class,
         CoinSetEntity::class,
+        CoinEntity::class,
+        CoinPagingStateEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -53,6 +59,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun coinDetailsDao(): CoinDetailsDao
     abstract fun collectionStatsDao(): CollectionStatsDao
     abstract fun coinSetDao(): CoinSetDao
+    abstract fun coinDao(): CoinDao
+    abstract fun coinPagingStateDao(): CoinPagingStateDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT", "EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
@@ -62,6 +70,7 @@ expect object AppDatabaseConstructor : RoomDatabaseConstructor<AppDatabase> {
 
 fun getAppDatabase(): AppDatabase {
     return getPlatform().getDatabaseBuilder()
+        // TODO: replace destructive migration before shipping offline WRITES
         .fallbackToDestructiveMigration(true)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)

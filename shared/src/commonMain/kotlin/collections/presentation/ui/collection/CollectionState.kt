@@ -18,4 +18,8 @@ data class CollectionState(
     val selectedScreenType: CollectionScreenType = CollectionScreenType.SUMMARY,
     val sets: List<CoinSet> = emptyList(),
     val showCreateSetDialog: Boolean = false,
+    val showDeleteCoinsDialog: Boolean = false,
+    val showDeleteSetsDialog: Boolean = false,
+    val showMoveSheet: Boolean = false,
+    val isProcessingBulkAction: Boolean = false,
 )

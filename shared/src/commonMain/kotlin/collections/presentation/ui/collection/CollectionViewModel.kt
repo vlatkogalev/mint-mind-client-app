@@ -3,11 +3,14 @@ package collections.presentation.ui.collection
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import app.domain.model.NetworkResult
 import collections.domain.CollectionRepository
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -16,6 +19,9 @@ class CollectionViewModel(
 ) : ViewModel() {
     private val _state = MutableStateFlow(CollectionState())
     val state: StateFlow<CollectionState> = _state
+
+    private val _events = Channel<CollectionEvent>(Channel.BUFFERED)
+    val events = _events.receiveAsFlow()
 
     val coinsPagingFlow = collectionRepository.getCoins().cachedIn(viewModelScope)
 
@@ -90,15 +96,95 @@ class CollectionViewModel(
                 }
             }
 
-            is CollectionScreenAction.DeleteSelectedCoins -> {
-                // TODO: wire to data layer (delete selectedCoins)
+            is CollectionScreenAction.RequestDeleteSelectedCoins -> {
+                _state.update { it.copy(showDeleteCoinsDialog = true) }
+            }
+
+            is CollectionScreenAction.DismissDeleteDialog -> {
                 _state.update {
-                    it.copy(isCoinMultiSelectModeEnabled = false, selectedCoins = emptySet())
+                    it.copy(showDeleteCoinsDialog = false, showDeleteSetsDialog = false)
                 }
             }
 
+            is CollectionScreenAction.ConfirmDeleteSelectedCoins -> {
+                val ids = _state.value.selectedCoins.map { it.id }
+                if (ids.size > BULK_ACTION_LIMIT) {
+                    _state.update { it.copy(showDeleteCoinsDialog = false) }
+                    _events.trySend(
+                        CollectionEvent.BulkActionBlocked(
+                            "Cannot delete more than $BULK_ACTION_LIMIT items at once."
+                        )
+                    )
+                    return
+                }
+                _state.update {
+                    it.copy(showDeleteCoinsDialog = false, isProcessingBulkAction = true)
+                }
+                viewModelScope.launch {
+                    when (val res = collectionRepository.deleteCoins(ids)) {
+                        is NetworkResult.Success -> {
+                            _state.update {
+                                it.copy(
+                                    isProcessingBulkAction = false,
+                                    isCoinMultiSelectModeEnabled = false,
+                                    selectedCoins = emptySet()
+                                )
+                            }
+                            _events.send(CollectionEvent.CoinsDeleted(res.data.deleted))
+                        }
+
+                        is NetworkResult.Error -> {
+                            _state.update { it.copy(isProcessingBulkAction = false) }
+                            _events.send(CollectionEvent.Error(res.error))
+                        }
+                    }
+                }
+            }
+
+            is CollectionScreenAction.ShowMoveSheet -> {
+                _state.update { it.copy(showMoveSheet = true) }
+            }
+
+            is CollectionScreenAction.DismissMoveSheet -> {
+                _state.update { it.copy(showMoveSheet = false) }
+            }
+
             is CollectionScreenAction.MoveSelectedCoins -> {
-                // TODO: wire to data layer (move selectedCoins to a set)
+                val ids = _state.value.selectedCoins.map { it.id }
+                if (ids.size > BULK_ACTION_LIMIT) {
+                    _state.update { it.copy(showMoveSheet = false) }
+                    _events.trySend(
+                        CollectionEvent.BulkActionBlocked(
+                            "Cannot move more than $BULK_ACTION_LIMIT items at once."
+                        )
+                    )
+                    return
+                }
+                val setName = _state.value.sets
+                    .firstOrNull { it.id == action.targetSetId }?.name.orEmpty()
+                _state.update {
+                    it.copy(showMoveSheet = false, isProcessingBulkAction = true)
+                }
+                viewModelScope.launch {
+                    when (val res =
+                        collectionRepository.moveCoinsToSet(action.targetSetId, ids)) {
+                        is NetworkResult.Success -> {
+                            _state.update {
+                                it.copy(
+                                    isProcessingBulkAction = false,
+                                    isCoinMultiSelectModeEnabled = false,
+                                    selectedCoins = emptySet()
+                                )
+                            }
+                            _events.send(CollectionEvent.CoinsMoved(ids.size, setName))
+                        }
+
+                        is NetworkResult.Error -> {
+                            _state.update { it.copy(isProcessingBulkAction = false) }
+                            _events.send(CollectionEvent.Error(res.error))
+                        }
+                    }
+                }
             }
 
             is CollectionScreenAction.ToggleSetMultiSelectMode -> {
@@ -122,14 +208,50 @@ class CollectionViewModel(
                 }
             }
 
-            is CollectionScreenAction.DeleteSelectedSets -> {
-                // TODO: wire to data layer (delete selectedSets)
+            is CollectionScreenAction.RequestDeleteSelectedSets -> {
+                _state.update { it.copy(showDeleteSetsDialog = true) }
+            }
+
+            is CollectionScreenAction.ConfirmDeleteSelectedSets -> {
+                val ids = _state.value.selectedSets.map { it.id }
+                if (ids.size > BULK_ACTION_LIMIT) {
+                    _state.update { it.copy(showDeleteSetsDialog = false) }
+                    _events.trySend(
+                        CollectionEvent.BulkActionBlocked(
+                            "Cannot delete more than $BULK_ACTION_LIMIT items at once."
+                        )
+                    )
+                    return
+                }
                 _state.update {
-                    it.copy(isSetMultiSelectModeEnabled = false, selectedSets = emptySet())
+                    it.copy(showDeleteSetsDialog = false, isProcessingBulkAction = true)
+                }
+                viewModelScope.launch {
+                    when (val res = collectionRepository.deleteSets(ids)) {
+                        is NetworkResult.Success -> {
+                            _state.update {
+                                it.copy(
+                                    isProcessingBulkAction = false,
+                                    isSetMultiSelectModeEnabled = false,
+                                    selectedSets = emptySet()
+                                )
+                            }
+                            _events.send(CollectionEvent.SetsDeleted(res.data.deleted))
+                        }
+
+                        is NetworkResult.Error -> {
+                            _state.update { it.copy(isProcessingBulkAction = false) }
+                            _events.send(CollectionEvent.Error(res.error))
+                        }
+                    }
                 }
             }
 
             else -> Unit
         }
+    }
+
+    companion object {
+        private const val BULK_ACTION_LIMIT = 200
     }
 }

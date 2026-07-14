@@ -79,6 +79,7 @@ fun BottomNavGraph(
             CollectionScreen(
                 state = state,
                 coins = coins,
+                events = viewModel.events,
                 snackbarHostState = snackbarHostState,
             ) { action ->
                 when (action) {

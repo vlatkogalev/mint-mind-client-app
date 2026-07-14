@@ -3,6 +3,8 @@ package collections.domain
 import androidx.paging.PagingData
 import app.domain.NetworkError
 import app.domain.model.EmptyNetworkResult
+import app.domain.model.NetworkResult
+import collections.data.remote.dto.BulkDeleteResponse
 import collections.domain.model.Coin
 import collections.domain.model.CoinDetails
 import collections.domain.model.CoinSet
@@ -18,4 +20,10 @@ interface CollectionRepository {
     suspend fun storeSets(): EmptyNetworkResult<NetworkError>
     fun getSets(): Flow<List<CoinSet>>
     suspend fun createSet(name: String, description: String?): EmptyNetworkResult<NetworkError>
+    suspend fun deleteCoins(coinIds: List<String>): NetworkResult<BulkDeleteResponse, NetworkError>
+    suspend fun deleteSets(setIds: List<String>): NetworkResult<BulkDeleteResponse, NetworkError>
+    suspend fun moveCoinsToSet(
+        targetSetId: String,
+        coinIds: List<String>
+    ): EmptyNetworkResult<NetworkError>
 }
