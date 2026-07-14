@@ -21,6 +21,7 @@ class CoinRemoteMediator(
     private val httpClient: HttpClient,
     private val db: AppDatabase,
     private val limit: Int,
+    private val sortBy: String,
     private val queryKey: String = DEFAULT_QUERY_KEY
 ) : RemoteMediator<Int, CoinEntity>() {
 
@@ -44,6 +45,7 @@ class CoinRemoteMediator(
             val response = safeCall<CoinsDto> {
                 httpClient.get(urlString = constructUrl("/coins")) {
                     parameter("limit", limit)
+                    parameter("sortBy", sortBy)
                 }
             }
 
@@ -88,6 +90,7 @@ class CoinRemoteMediator(
                 httpClient.get(urlString = constructUrl("/coins")) {
                     parameter("limit", limit)
                     parameter("cursor", cursor)
+                    parameter("sortBy", sortBy)
                 }
             }
 

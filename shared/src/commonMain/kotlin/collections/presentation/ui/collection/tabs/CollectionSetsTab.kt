@@ -28,6 +28,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,10 +39,12 @@ import androidx.compose.ui.unit.dp
 import app.presentation.components.EmptyContent
 import app.presentation.util.calculateGridConfig
 import collections.domain.model.CoinSet
+import collections.domain.model.CoinSetSortOption
 import collections.presentation.components.MultiSelectionAction
 import collections.presentation.components.MultiSelectionActionBar
 import collections.presentation.components.MultiSelectionContainer
 import collections.presentation.components.SetItem
+import collections.presentation.components.SortDropdownMenu
 import collections.presentation.ui.collection.CollectionScreenAction
 import collections.presentation.ui.collection.CollectionState
 import mintmind.shared.generated.resources.Res
@@ -72,7 +78,8 @@ fun CollectionSetsTab(
                 SetsHeader(
                     isMultiSelectEnabled = state.isSetMultiSelectModeEnabled,
                     onClickCreateNewSet = { onAction(CollectionScreenAction.ShowCreateSetDialog) },
-                    onClickSort = { /* TODO: sort */ },
+                    setSortOption = state.setSortOption,
+                    onChangeSetSort = { onAction(CollectionScreenAction.ChangeSetSort(it)) },
                     onToggleMultiSelect = { onAction(CollectionScreenAction.ToggleSetMultiSelectMode) },
                 )
             }
@@ -137,7 +144,8 @@ private fun DeleteSetsDialog(
 private fun SetsHeader(
     isMultiSelectEnabled: Boolean,
     onClickCreateNewSet: () -> Unit,
-    onClickSort: () -> Unit,
+    setSortOption: CoinSetSortOption,
+    onChangeSetSort: (CoinSetSortOption) -> Unit,
     onToggleMultiSelect: () -> Unit,
 ) {
     Column(
@@ -149,7 +157,8 @@ private fun SetsHeader(
         )
         SetsToolbar(
             isMultiSelectEnabled = isMultiSelectEnabled,
-            onClickSort = onClickSort,
+            setSortOption = setSortOption,
+            onChangeSetSort = onChangeSetSort,
             onToggleMultiSelect = onToggleMultiSelect,
         )
     }
@@ -177,17 +186,31 @@ private fun CreateSetButton(
 @Composable
 private fun SetsToolbar(
     isMultiSelectEnabled: Boolean,
-    onClickSort: () -> Unit,
+    setSortOption: CoinSetSortOption,
+    onChangeSetSort: (CoinSetSortOption) -> Unit,
     onToggleMultiSelect: () -> Unit,
 ) {
+    var sortExpanded by remember { mutableStateOf(false) }
+
     Row(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-        TextButton(onClick = onClickSort) {
-            Icon(
-                imageVector = Icons.Outlined.FormatLineSpacing,
-                contentDescription = null
+        Box {
+            TextButton(onClick = { sortExpanded = true }) {
+                Icon(
+                    imageVector = Icons.Outlined.FormatLineSpacing,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = stringResource(Res.string.collection_sort))
+            }
+
+            SortDropdownMenu(
+                expanded = sortExpanded,
+                options = CoinSetSortOption.entries,
+                selected = setSortOption,
+                labelOf = { it.label },
+                onSelect = onChangeSetSort,
+                onDismiss = { sortExpanded = false },
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = stringResource(Res.string.collection_sort))
         }
 
         Spacer(Modifier.weight(1f))

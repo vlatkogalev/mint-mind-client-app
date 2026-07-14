@@ -5,15 +5,20 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import app.domain.model.NetworkResult
 import collections.domain.CollectionRepository
+import collections.domain.model.CoinSetSortOption
+import collections.domain.model.CoinSortOption
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CollectionViewModel(
     private val collectionRepository: CollectionRepository,
 ) : ViewModel() {
@@ -23,7 +28,12 @@ class CollectionViewModel(
     private val _events = Channel<CollectionEvent>(Channel.BUFFERED)
     val events = _events.receiveAsFlow()
 
-    val coinsPagingFlow = collectionRepository.getCoins().cachedIn(viewModelScope)
+    private val coinSort = MutableStateFlow(CoinSortOption.DEFAULT)
+    val coinsPagingFlow = coinSort
+        .flatMapLatest { collectionRepository.getCoins(sortBy = it) }
+        .cachedIn(viewModelScope)
+
+    private val setSort = MutableStateFlow(CoinSetSortOption.DEFAULT)
 
     init {
         collectionRepository.getCollectionStats()
@@ -39,10 +49,14 @@ class CollectionViewModel(
             }
             .launchIn(viewModelScope)
 
-        collectionRepository.getSets()
+        setSort.flatMapLatest { collectionRepository.getSets(it) }
             .onEach { sets ->
                 _state.update { it.copy(sets = sets) }
             }
+            .launchIn(viewModelScope)
+
+        setSort
+            .onEach { collectionRepository.storeSets(it) }
             .launchIn(viewModelScope)
 
         viewModelScope.launch {
@@ -56,8 +70,31 @@ class CollectionViewModel(
 
     fun onScreenAction(action: CollectionScreenAction) {
         when (action) {
+            is CollectionScreenAction.NavigateToCoin -> Unit
+            is CollectionScreenAction.NavigateToSet -> Unit
+
             is CollectionScreenAction.ChangeScreenType -> {
                 _state.update { it.copy(selectedScreenType = action.screenType) }
+            }
+
+            is CollectionScreenAction.ChangeCoinSort -> {
+                _state.update {
+                    it.copy(
+                        coinSortOption = action.option,
+                        selectedCoins = emptySet(),
+                    )
+                }
+                coinSort.value = action.option
+            }
+
+            is CollectionScreenAction.ChangeSetSort -> {
+                _state.update {
+                    it.copy(
+                        setSortOption = action.option,
+                        selectedSets = emptySet(),
+                    )
+                }
+                setSort.value = action.option
             }
 
             is CollectionScreenAction.ShowCreateSetDialog -> {
@@ -246,8 +283,6 @@ class CollectionViewModel(
                     }
                 }
             }
-
-            else -> Unit
         }
     }
 

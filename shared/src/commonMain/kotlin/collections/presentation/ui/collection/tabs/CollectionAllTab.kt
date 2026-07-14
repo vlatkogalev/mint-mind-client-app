@@ -39,6 +39,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,10 +53,12 @@ import androidx.paging.compose.itemKey
 import app.presentation.components.EmptyContent
 import app.presentation.util.calculateGridConfig
 import collections.domain.model.Coin
+import collections.domain.model.CoinSortOption
 import collections.presentation.components.CoinItem
 import collections.presentation.components.MultiSelectionAction
 import collections.presentation.components.MultiSelectionActionBar
 import collections.presentation.components.MultiSelectionContainer
+import collections.presentation.components.SortDropdownMenu
 import collections.presentation.ui.collection.CollectionScreenAction
 import collections.presentation.ui.collection.CollectionState
 import mintmind.shared.generated.resources.Res
@@ -91,7 +97,8 @@ fun CollectionAllTab(
                 CoinsToolbar(
                     isMultiSelectEnabled = state.isCoinMultiSelectModeEnabled,
                     onClickFilter = { /* TODO: filter */ },
-                    onClickSort = { /* TODO: sort */ },
+                    coinSortOption = state.coinSortOption,
+                    onChangeSort = { onAction(CollectionScreenAction.ChangeCoinSort(it)) },
                     onToggleMultiSelect = { onAction(CollectionScreenAction.ToggleCoinMultiSelectMode) },
                 )
             }
@@ -244,9 +251,12 @@ private fun MoveCoinsSheet(
 private fun CoinsToolbar(
     isMultiSelectEnabled: Boolean,
     onClickFilter: () -> Unit,
-    onClickSort: () -> Unit,
+    coinSortOption: CoinSortOption,
+    onChangeSort: (CoinSortOption) -> Unit,
     onToggleMultiSelect: () -> Unit,
 ) {
+    var sortExpanded by remember { mutableStateOf(false) }
+
     Row(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         TextButton(onClick = onClickFilter) {
             Icon(
@@ -257,13 +267,24 @@ private fun CoinsToolbar(
             Text(text = stringResource(Res.string.collection_filter))
         }
 
-        TextButton(onClick = onClickSort) {
-            Icon(
-                imageVector = Icons.Outlined.FormatLineSpacing,
-                contentDescription = null
+        Box {
+            TextButton(onClick = { sortExpanded = true }) {
+                Icon(
+                    imageVector = Icons.Outlined.FormatLineSpacing,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = stringResource(Res.string.collection_sort))
+            }
+
+            SortDropdownMenu(
+                expanded = sortExpanded,
+                options = CoinSortOption.entries,
+                selected = coinSortOption,
+                labelOf = { it.label },
+                onSelect = onChangeSort,
+                onDismiss = { sortExpanded = false },
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = stringResource(Res.string.collection_sort))
         }
 
         Spacer(Modifier.weight(1f))

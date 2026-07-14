@@ -42,10 +42,13 @@ import collections.domain.mapper.toCollectionStats
 import collections.domain.model.Coin
 import collections.domain.model.CoinDetails
 import collections.domain.model.CoinSet
+import collections.domain.model.CoinSetSortOption
+import collections.domain.model.CoinSortOption
 import collections.domain.model.CollectionStats
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import kotlinx.coroutines.flow.Flow
@@ -76,15 +79,15 @@ class CollectionRepositoryImpl(
         collectionStatsDao.getCollectionStats().map { it?.toCollectionStats() }
 
     @OptIn(ExperimentalPagingApi::class)
-    override fun getCoins(limit: Int): Flow<PagingData<Coin>> =
+    override fun getCoins(sortBy: CoinSortOption, limit: Int): Flow<PagingData<Coin>> =
         Pager(
             config = PagingConfig(
                 pageSize = limit,
                 initialLoadSize = limit,
                 enablePlaceholders = false,
             ),
-            remoteMediator = CoinRemoteMediator(httpClient, db, limit),
-            pagingSourceFactory = { coinDao.pagingSource(setId = null) }
+            remoteMediator = CoinRemoteMediator(httpClient, db, limit, sortBy.wireValue),
+            pagingSourceFactory = { coinDao.pagingSourceWithSort(setId = null, sortBy) }
         ).flow.map { pagingData -> pagingData.map { it.toCoin() } }
 
     override suspend fun storeCoinDetails(id: String): EmptyNetworkResult<NetworkError> {
@@ -103,16 +106,18 @@ class CollectionRepositoryImpl(
     override fun getCoinDetails(id: String): Flow<CoinDetails?> =
         coinDetailsDao.getByIdWithRelations(id).map { it?.toCoinDetails() }
 
-    override suspend fun storeSets(): EmptyNetworkResult<NetworkError> {
+    override suspend fun storeSets(sortBy: CoinSetSortOption): EmptyNetworkResult<NetworkError> {
         return safeCall<List<CoinSetDto>> {
-            httpClient.get(urlString = constructUrl("/sets"))
+            httpClient.get(urlString = constructUrl("/sets")) {
+                parameter("sortBy", sortBy.wireValue)
+            }
         }.map { dtos ->
             coinSetDao.replaceAll(dtos.toCoinSetEntities())
         }.asEmptyDataNetworkResult()
     }
 
-    override fun getSets(): Flow<List<CoinSet>> =
-        coinSetDao.getAllSets().map { entities -> entities.map { it.toCoinSet() } }
+    override fun getSets(sortBy: CoinSetSortOption): Flow<List<CoinSet>> =
+        coinSetDao.getAllSets(sortBy).map { entities -> entities.map { it.toCoinSet() } }
 
     override suspend fun createSet(
         name: String,
