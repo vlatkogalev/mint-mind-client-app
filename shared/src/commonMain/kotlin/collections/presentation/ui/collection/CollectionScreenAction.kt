@@ -1,5 +1,7 @@
 package collections.presentation.ui.collection
 
+import collections.domain.model.Coin
+import collections.domain.model.CoinSet
 import collections.domain.model.CollectionScreenType
 
 sealed interface CollectionScreenAction {
@@ -11,11 +13,11 @@ sealed interface CollectionScreenAction {
     data class CreateSet(val name: String, val description: String?) : CollectionScreenAction
 
     data object ToggleCoinMultiSelectMode : CollectionScreenAction
-    data class ToggleCoinSelected(val coinId: String) : CollectionScreenAction
+    data class ToggleCoinSelected(val coin: Coin) : CollectionScreenAction
     data object DeleteSelectedCoins : CollectionScreenAction
     data object MoveSelectedCoins : CollectionScreenAction
 
     data object ToggleSetMultiSelectMode : CollectionScreenAction
-    data class ToggleSetSelected(val setId: String) : CollectionScreenAction
+    data class ToggleSetSelected(val set: CoinSet) : CollectionScreenAction
     data object DeleteSelectedSets : CollectionScreenAction
 }

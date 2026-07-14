@@ -38,6 +38,7 @@ import collections.presentation.components.MultiSelectionAction
 import collections.presentation.components.MultiSelectionActionBar
 import collections.presentation.components.MultiSelectionContainer
 import collections.presentation.components.SetItem
+import collections.presentation.ui.collection.CollectionScreenAction
 import collections.presentation.ui.collection.CollectionState
 import mintmind.shared.generated.resources.Res
 import mintmind.shared.generated.resources.collection_create_set
@@ -50,12 +51,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun CollectionSetsTab(
     state: CollectionState,
-    onClickCreateNewSet: () -> Unit,
-    onSelectSet: (id: String) -> Unit,
-    onCheckSet: (id: String) -> Unit,
-    onClickSort: () -> Unit,
-    onDeleteSelectedSets: () -> Unit,
-    onSetMultiSelectionModeEnabled: () -> Unit,
+    onAction: (CollectionScreenAction) -> Unit,
 ) {
     val windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
     val gridConfig = windowSizeClass.calculateGridConfig(1, 2, 3)
@@ -71,9 +67,9 @@ fun CollectionSetsTab(
             stickyHeader {
                 SetsHeader(
                     isMultiSelectEnabled = state.isSetMultiSelectModeEnabled,
-                    onClickCreateNewSet = onClickCreateNewSet,
-                    onClickSort = onClickSort,
-                    onToggleMultiSelect = onSetMultiSelectionModeEnabled,
+                    onClickCreateNewSet = { onAction(CollectionScreenAction.ShowCreateSetDialog) },
+                    onClickSort = { /* TODO: sort */ },
+                    onToggleMultiSelect = { onAction(CollectionScreenAction.ToggleSetMultiSelectMode) },
                 )
             }
 
@@ -83,17 +79,16 @@ fun CollectionSetsTab(
                 setItems(
                     sets = state.sets,
                     isMultiSelectEnabled = state.isSetMultiSelectModeEnabled,
-                    selectedSetIds = state.selectedSetIds,
-                    onSelectSet = onSelectSet,
-                    onToggleSelected = onCheckSet,
+                    selectedSets = state.selectedSets,
+                    onAction = onAction,
                 )
             }
         }
 
         MultiSelectionActionBar(isEnabled = state.isSetMultiSelectModeEnabled) {
             MultiSelectionAction(
-                onClick = onDeleteSelectedSets,
-                enabled = state.selectedSetIds.isNotEmpty(),
+                onClick = { onAction(CollectionScreenAction.DeleteSelectedSets) },
+                enabled = state.selectedSets.isNotEmpty(),
                 color = MaterialTheme.colorScheme.error,
                 icon = Icons.Outlined.Delete,
                 label = stringResource(Res.string.collection_remove_item),
@@ -196,9 +191,8 @@ private fun LazyGridScope.emptyState() {
 private fun LazyGridScope.setItems(
     sets: List<CoinSet>,
     isMultiSelectEnabled: Boolean,
-    selectedSetIds: Set<String>,
-    onSelectSet: (id: String) -> Unit,
-    onToggleSelected: (id: String) -> Unit,
+    selectedSets: Set<CoinSet>,
+    onAction: (CollectionScreenAction) -> Unit,
 ) {
     items(
         count = sets.size,
@@ -207,18 +201,26 @@ private fun LazyGridScope.setItems(
         val set = sets[index]
         MultiSelectionContainer(
             isEnabled = isMultiSelectEnabled,
-            isSelected = set.id in selectedSetIds,
+            isSelected = set in selectedSets,
             onClick = {
-                if (isMultiSelectEnabled) onToggleSelected(set.id) else onSelectSet(set.id)
+                if (isMultiSelectEnabled) {
+                    onAction(CollectionScreenAction.ToggleSetSelected(set))
+                } else {
+                    onAction(CollectionScreenAction.NavigateToSet(set.id))
+                }
             },
-            onCheckedChange = { onToggleSelected(set.id) },
+            onCheckedChange = { onAction(CollectionScreenAction.ToggleSetSelected(set)) },
             modifier = Modifier.width(320.dp).animateItem(),
         ) {
             SetItem(
                 set = set,
                 modifier = Modifier,
                 onClick = {
-                    if (isMultiSelectEnabled) onToggleSelected(set.id) else onSelectSet(set.id)
+                    if (isMultiSelectEnabled) {
+                        onAction(CollectionScreenAction.ToggleSetSelected(set))
+                    } else {
+                        onAction(CollectionScreenAction.NavigateToSet(set.id))
+                    }
                 },
             )
         }

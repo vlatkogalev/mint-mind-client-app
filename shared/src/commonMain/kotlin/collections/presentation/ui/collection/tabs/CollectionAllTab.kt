@@ -43,6 +43,7 @@ import collections.presentation.components.CoinItem
 import collections.presentation.components.MultiSelectionAction
 import collections.presentation.components.MultiSelectionActionBar
 import collections.presentation.components.MultiSelectionContainer
+import collections.presentation.ui.collection.CollectionScreenAction
 import collections.presentation.ui.collection.CollectionState
 import mintmind.shared.generated.resources.Res
 import mintmind.shared.generated.resources.collection_filter
@@ -57,14 +58,7 @@ import org.jetbrains.compose.resources.stringResource
 fun CollectionAllTab(
     state: CollectionState,
     coins: LazyPagingItems<Coin>,
-    onIdentifyCoin: () -> Unit,
-    onSelectCoin: (id: String) -> Unit,
-    onCheckCoin: (id: String) -> Unit,
-    onClickFilter: () -> Unit,
-    onClickSort: () -> Unit,
-    onDeleteSelectedCoins: () -> Unit,
-    onMoveSelectedCoins: () -> Unit,
-    onCoinMultiSelectionModeEnabled: () -> Unit
+    onAction: (CollectionScreenAction) -> Unit,
 ) {
     val windowSizeClass = currentWindowAdaptiveInfoV2().windowSizeClass
     val gridConfig = windowSizeClass.calculateGridConfig(1, 2, 3)
@@ -80,9 +74,9 @@ fun CollectionAllTab(
             stickyHeader {
                 CoinsToolbar(
                     isMultiSelectEnabled = state.isCoinMultiSelectModeEnabled,
-                    onClickFilter = onClickFilter,
-                    onClickSort = onClickSort,
-                    onToggleMultiSelect = onCoinMultiSelectionModeEnabled,
+                    onClickFilter = { /* TODO: filter */ },
+                    onClickSort = { /* TODO: sort */ },
+                    onToggleMultiSelect = { onAction(CollectionScreenAction.ToggleCoinMultiSelectMode) },
                 )
             }
 
@@ -93,9 +87,8 @@ fun CollectionAllTab(
             coinItems(
                 coins = coins,
                 isMultiSelectEnabled = state.isCoinMultiSelectModeEnabled,
-                selectedCoinIds = state.selectedCoinIds,
-                onSelectCoin = onSelectCoin,
-                onToggleSelected = onCheckCoin,
+                selectedCoins = state.selectedCoins,
+                onAction = onAction,
             )
 
             if (coins.loadState.refresh is LoadState.NotLoading && coins.itemSnapshotList.isEmpty()) {
@@ -109,15 +102,15 @@ fun CollectionAllTab(
 
         MultiSelectionActionBar(isEnabled = state.isCoinMultiSelectModeEnabled) {
             MultiSelectionAction(
-                onClick = onDeleteSelectedCoins,
-                enabled = state.selectedCoinIds.isNotEmpty(),
+                onClick = { onAction(CollectionScreenAction.DeleteSelectedCoins) },
+                enabled = state.selectedCoins.isNotEmpty(),
                 color = MaterialTheme.colorScheme.error,
                 icon = Icons.Outlined.Delete,
                 label = stringResource(Res.string.collection_remove_item),
             )
             MultiSelectionAction(
-                onClick = onMoveSelectedCoins,
-                enabled = state.selectedCoinIds.isNotEmpty(),
+                onClick = { onAction(CollectionScreenAction.MoveSelectedCoins) },
+                enabled = state.selectedCoins.isNotEmpty(),
                 icon = Icons.Outlined.MoveDown,
                 label = stringResource(Res.string.collection_move_item),
             )
@@ -177,27 +170,34 @@ private fun CoinsToolbar(
 private fun LazyGridScope.coinItems(
     coins: LazyPagingItems<Coin>,
     isMultiSelectEnabled: Boolean,
-    selectedCoinIds: Set<String>,
-    onSelectCoin: (id: String) -> Unit,
-    onToggleSelected: (id: String) -> Unit,
+    selectedCoins: Set<Coin>,
+    onAction: (CollectionScreenAction) -> Unit,
 ) {
     items(count = coins.itemCount, key = coins.itemKey { it.id }) { index ->
         val coin = coins[index]
         if (coin != null) {
             MultiSelectionContainer(
                 isEnabled = isMultiSelectEnabled,
-                isSelected = coin.id in selectedCoinIds,
+                isSelected = coin in selectedCoins,
                 onClick = {
-                    if (isMultiSelectEnabled) onToggleSelected(coin.id) else onSelectCoin(coin.id)
+                    if (isMultiSelectEnabled) {
+                        onAction(CollectionScreenAction.ToggleCoinSelected(coin))
+                    } else {
+                        onAction(CollectionScreenAction.NavigateToCoin(coin.id))
+                    }
                 },
-                onCheckedChange = { onToggleSelected(coin.id) },
+                onCheckedChange = { onAction(CollectionScreenAction.ToggleCoinSelected(coin)) },
                 modifier = Modifier.width(320.dp).animateItem(),
             ) {
                 CoinItem(
                     coin = coin,
                     modifier = Modifier,
                     onClick = {
-                        if (isMultiSelectEnabled) onToggleSelected(coin.id) else onSelectCoin(coin.id)
+                        if (isMultiSelectEnabled) {
+                            onAction(CollectionScreenAction.ToggleCoinSelected(coin))
+                        } else {
+                            onAction(CollectionScreenAction.NavigateToCoin(coin.id))
+                        }
                     },
                 )
             }

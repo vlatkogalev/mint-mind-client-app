@@ -124,30 +124,14 @@ private fun MainContent(
                     CollectionAllTab(
                         state = state,
                         coins = coins,
-                        onIdentifyCoin = { },
-                        onSelectCoin = { onScreenAction(CollectionScreenAction.NavigateToCoin(it)) },
-                        onCheckCoin = { onScreenAction(CollectionScreenAction.ToggleCoinSelected(it)) },
-                        onClickFilter = { },
-                        onClickSort = { },
-                        onDeleteSelectedCoins = { onScreenAction(CollectionScreenAction.DeleteSelectedCoins) },
-                        onMoveSelectedCoins = { onScreenAction(CollectionScreenAction.MoveSelectedCoins) },
-                        onCoinMultiSelectionModeEnabled = { onScreenAction(CollectionScreenAction.ToggleCoinMultiSelectMode) },
+                        onAction = onScreenAction,
                     )
                 }
 
                 CollectionScreenType.SETS -> {
                     CollectionSetsTab(
                         state = state,
-                        onClickCreateNewSet = {
-                            onScreenAction(CollectionScreenAction.ShowCreateSetDialog)
-                        },
-                        onSelectSet = {
-                            onScreenAction(CollectionScreenAction.NavigateToSet(it))
-                        },
-                        onCheckSet = { onScreenAction(CollectionScreenAction.ToggleSetSelected(it)) },
-                        onClickSort = { },
-                        onDeleteSelectedSets = { onScreenAction(CollectionScreenAction.DeleteSelectedSets) },
-                        onSetMultiSelectionModeEnabled = { onScreenAction(CollectionScreenAction.ToggleSetMultiSelectMode) },
+                        onAction = onScreenAction,
                     )
                 }
             }

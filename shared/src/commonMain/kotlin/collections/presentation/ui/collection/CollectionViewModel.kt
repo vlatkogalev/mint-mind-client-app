@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CollectionViewModel(
@@ -21,18 +22,20 @@ class CollectionViewModel(
     init {
         collectionRepository.getCollectionStats()
             .onEach { stats ->
-                _state.value = _state.value.copy(
-                    totalCollectionValue = stats?.estimatedTotalValueMean ?: 0.0,
-                    totalCoinCount = stats?.totalCoins ?: 0,
-                    totalIssuerCount = stats?.totalIssuers ?: 0,
-                    highlights = stats?.highlights,
-                )
+                _state.update {
+                    it.copy(
+                        totalCollectionValue = stats?.estimatedTotalValueMean ?: 0.0,
+                        totalCoinCount = stats?.totalCoins ?: 0,
+                        totalIssuerCount = stats?.totalIssuers ?: 0,
+                        highlights = stats?.highlights,
+                    )
+                }
             }
             .launchIn(viewModelScope)
 
         collectionRepository.getSets()
             .onEach { sets ->
-                _state.value = _state.value.copy(sets = sets)
+                _state.update { it.copy(sets = sets) }
             }
             .launchIn(viewModelScope)
 
@@ -48,72 +51,82 @@ class CollectionViewModel(
     fun onScreenAction(action: CollectionScreenAction) {
         when (action) {
             is CollectionScreenAction.ChangeScreenType -> {
-                _state.value = _state.value.copy(selectedScreenType = action.screenType)
+                _state.update { it.copy(selectedScreenType = action.screenType) }
             }
 
             is CollectionScreenAction.ShowCreateSetDialog -> {
-                _state.value = _state.value.copy(showCreateSetDialog = true)
+                _state.update { it.copy(showCreateSetDialog = true) }
             }
 
             is CollectionScreenAction.DismissCreateSetDialog -> {
-                _state.value = _state.value.copy(showCreateSetDialog = false)
+                _state.update { it.copy(showCreateSetDialog = false) }
             }
 
             is CollectionScreenAction.CreateSet -> {
-                _state.value = _state.value.copy(showCreateSetDialog = false)
+                _state.update { it.copy(showCreateSetDialog = false) }
                 viewModelScope.launch {
                     collectionRepository.createSet(action.name, action.description)
                 }
             }
 
             is CollectionScreenAction.ToggleCoinMultiSelectMode -> {
-                val enabled = !_state.value.isCoinMultiSelectModeEnabled
-                _state.value = _state.value.copy(
-                    isCoinMultiSelectModeEnabled = enabled,
-                    selectedCoinIds = if (enabled) _state.value.selectedCoinIds else emptySet(),
-                )
+                _state.update { current ->
+                    val enabled = !current.isCoinMultiSelectModeEnabled
+                    current.copy(
+                        isCoinMultiSelectModeEnabled = enabled,
+                        selectedCoins = if (enabled) current.selectedCoins else emptySet(),
+                    )
+                }
             }
 
             is CollectionScreenAction.ToggleCoinSelected -> {
-                val current = _state.value.selectedCoinIds
-                val updated =
-                    if (action.coinId in current) current - action.coinId else current + action.coinId
-                _state.value = _state.value.copy(selectedCoinIds = updated)
+                _state.update { current ->
+                    val updated = if (action.coin in current.selectedCoins) {
+                        current.selectedCoins - action.coin
+                    } else {
+                        current.selectedCoins + action.coin
+                    }
+                    current.copy(selectedCoins = updated)
+                }
             }
 
             is CollectionScreenAction.DeleteSelectedCoins -> {
-                // TODO: wire to data layer (delete selected coins)
-                _state.value = _state.value.copy(
-                    isCoinMultiSelectModeEnabled = false,
-                    selectedCoinIds = emptySet(),
-                )
+                // TODO: wire to data layer (delete selectedCoins)
+                _state.update {
+                    it.copy(isCoinMultiSelectModeEnabled = false, selectedCoins = emptySet())
+                }
             }
 
             is CollectionScreenAction.MoveSelectedCoins -> {
-                // TODO: wire to data layer (move selected coins to a set)
+                // TODO: wire to data layer (move selectedCoins to a set)
             }
 
             is CollectionScreenAction.ToggleSetMultiSelectMode -> {
-                val enabled = !_state.value.isSetMultiSelectModeEnabled
-                _state.value = _state.value.copy(
-                    isSetMultiSelectModeEnabled = enabled,
-                    selectedSetIds = if (enabled) _state.value.selectedSetIds else emptySet(),
-                )
+                _state.update { current ->
+                    val enabled = !current.isSetMultiSelectModeEnabled
+                    current.copy(
+                        isSetMultiSelectModeEnabled = enabled,
+                        selectedSets = if (enabled) current.selectedSets else emptySet(),
+                    )
+                }
             }
 
             is CollectionScreenAction.ToggleSetSelected -> {
-                val current = _state.value.selectedSetIds
-                val updated =
-                    if (action.setId in current) current - action.setId else current + action.setId
-                _state.value = _state.value.copy(selectedSetIds = updated)
+                _state.update { current ->
+                    val updated = if (action.set in current.selectedSets) {
+                        current.selectedSets - action.set
+                    } else {
+                        current.selectedSets + action.set
+                    }
+                    current.copy(selectedSets = updated)
+                }
             }
 
             is CollectionScreenAction.DeleteSelectedSets -> {
-                // TODO: wire to data layer (delete selected sets)
-                _state.value = _state.value.copy(
-                    isSetMultiSelectModeEnabled = false,
-                    selectedSetIds = emptySet(),
-                )
+                // TODO: wire to data layer (delete selectedSets)
+                _state.update {
+                    it.copy(isSetMultiSelectModeEnabled = false, selectedSets = emptySet())
+                }
             }
 
             else -> Unit
