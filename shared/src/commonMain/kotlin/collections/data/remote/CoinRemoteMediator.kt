@@ -8,6 +8,7 @@ import app.data.local.AppDatabase
 import app.data.remote.constructUrl
 import app.data.remote.safeCall
 import app.domain.model.NetworkResult
+import app.domain.toErrorMessage
 import collections.data.local.entity.CoinEntity
 import collections.data.local.entity.CoinPagingStateEntity
 import collections.data.remote.dto.CoinsDto
@@ -22,7 +23,7 @@ class CoinRemoteMediator(
     private val db: AppDatabase,
     private val limit: Int,
     private val sortBy: String,
-    private val queryKey: String = DEFAULT_QUERY_KEY
+    private val queryKey: String = "$DEFAULT_QUERY_KEY:$sortBy",
 ) : RemoteMediator<Int, CoinEntity>() {
 
     override suspend fun initialize(): InitializeAction {
@@ -52,14 +53,14 @@ class CoinRemoteMediator(
             when (response) {
                 is NetworkResult.Error -> {
                     MediatorResult.Error(
-                        Throwable(response.error.toString())
+                        Throwable(response.error.toErrorMessage().asString())
                     )
                 }
 
                 is NetworkResult.Success -> {
                     val entities = response.data.toCoinEntities()
                     db.coinDao().replaceAll(entities)
-                    db.coinPagingStateDao().clear(queryKey)
+                    db.coinPagingStateDao().clearAll()
                     db.coinPagingStateDao().upsert(
                         CoinPagingStateEntity(
                             queryKey = queryKey,
@@ -97,7 +98,7 @@ class CoinRemoteMediator(
             when (response) {
                 is NetworkResult.Error -> {
                     MediatorResult.Error(
-                        Throwable(response.error.toString())
+                        Throwable(response.error.toErrorMessage().asString())
                     )
                 }
 

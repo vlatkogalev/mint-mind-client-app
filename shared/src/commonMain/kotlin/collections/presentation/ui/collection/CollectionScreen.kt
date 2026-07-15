@@ -58,11 +58,11 @@ private val CollectionScreenEntries = CollectionScreenType.entries
 fun CollectionScreen(
     state: CollectionState,
     coins: LazyPagingItems<Coin>,
-    events: Flow<CollectionEvent>,
+    events: Flow<CollectionScreenEvent>,
     snackbarHostState: SnackbarHostState,
     onScreenAction: (CollectionScreenAction) -> Unit,
 ) {
-    var currentEvent by remember { mutableStateOf<CollectionEvent?>(null) }
+    var currentEvent by remember { mutableStateOf<CollectionScreenEvent?>(null) }
 
     LaunchedEffect(Unit) {
         events.collect { currentEvent = it }
@@ -70,7 +70,7 @@ fun CollectionScreen(
 
     currentEvent?.let { event ->
         val message = when (event) {
-            is CollectionEvent.CoinsDeleted -> {
+            is CollectionScreenEvent.CoinsDeleted -> {
                 pluralStringResource(
                     Res.plurals.collection_coins_deleted,
                     event.count,
@@ -78,7 +78,7 @@ fun CollectionScreen(
                 )
             }
 
-            is CollectionEvent.SetsDeleted -> {
+            is CollectionScreenEvent.SetsDeleted -> {
                 pluralStringResource(
                     Res.plurals.collection_sets_deleted,
                     event.count,
@@ -86,7 +86,7 @@ fun CollectionScreen(
                 )
             }
 
-            is CollectionEvent.CoinsMoved -> {
+            is CollectionScreenEvent.CoinsMoved -> {
                 pluralStringResource(
                     Res.plurals.collection_coins_moved,
                     event.count,
@@ -95,9 +95,9 @@ fun CollectionScreen(
                 )
             }
 
-            is CollectionEvent.Error -> "An error occurred. Please try again."
+            is CollectionScreenEvent.Error -> "An error occurred. Please try again."
 
-            is CollectionEvent.BulkActionBlocked -> event.reason
+            is CollectionScreenEvent.BulkActionBlocked -> event.reason
         }
 
         LaunchedEffect(event) {

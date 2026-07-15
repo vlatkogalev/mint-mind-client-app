@@ -9,6 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.tooling.preview.Preview
+import app.presentation.theme.AppTheme
 import mintmind.shared.generated.resources.Res
 import mintmind.shared.generated.resources.cancel
 import mintmind.shared.generated.resources.collection_create_set
@@ -47,4 +49,15 @@ fun CreateSetDialog(
             }
         }
     )
+}
+
+@Preview
+@Composable
+private fun CreateSetDialogPreview() {
+    AppTheme {
+        CreateSetDialog(
+            onConfirm = { },
+            onDismiss = { }
+        )
+    }
 }

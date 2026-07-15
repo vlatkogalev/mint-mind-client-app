@@ -17,12 +17,6 @@ interface CoinSetDao {
     @Query("SELECT * FROM coin_sets ORDER BY createdAt ASC")
     fun getAllSetsByDateCreatedOldToNew(): Flow<List<CoinSetEntity>>
 
-    @Query("SELECT * FROM coin_sets ORDER BY name COLLATE NOCASE ASC")
-    fun getAllSetsByNameAZ(): Flow<List<CoinSetEntity>>
-
-    @Query("SELECT * FROM coin_sets ORDER BY name COLLATE NOCASE DESC")
-    fun getAllSetsByNameZA(): Flow<List<CoinSetEntity>>
-
     @Query("SELECT * FROM coin_sets ORDER BY updatedAt DESC")
     fun getAllSetsByDateUpdatedNewToOld(): Flow<List<CoinSetEntity>>
 
@@ -45,8 +39,6 @@ interface CoinSetDao {
         return when (sortBy) {
             CoinSetSortOption.DATE_CREATED_NEW_TO_OLD -> getAllSets()
             CoinSetSortOption.DATE_CREATED_OLD_TO_NEW -> getAllSetsByDateCreatedOldToNew()
-            CoinSetSortOption.NAME_A_TO_Z -> getAllSetsByNameAZ()
-            CoinSetSortOption.NAME_Z_TO_A -> getAllSetsByNameZA()
             CoinSetSortOption.DATE_UPDATED_NEW_TO_OLD -> getAllSetsByDateUpdatedNewToOld()
             CoinSetSortOption.DATE_UPDATED_OLD_TO_NEW -> getAllSetsByDateUpdatedOldToNew()
             CoinSetSortOption.COIN_COUNT_HIGH_TO_LOW -> getAllSetsByCoinCountHighToLow()

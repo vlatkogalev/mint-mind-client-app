@@ -14,16 +14,16 @@ interface CoinDao {
     @Query("SELECT * FROM coins WHERE (:setId IS NULL OR setId = :setId) ORDER BY createdAt DESC")
     fun pagingSource(setId: String?): PagingSource<Int, CoinEntity>
 
-    @Query("SELECT * FROM coins WHERE (:setId IS NULL OR setId = :setId) ORDER BY estimatedValueMean DESC")
+    @Query("SELECT * FROM coins WHERE (:setId IS NULL OR setId = :setId) ORDER BY estimatedValueMean IS NULL, estimatedValueMean DESC")
     fun pagingSourceByValueHighToLow(setId: String?): PagingSource<Int, CoinEntity>
 
-    @Query("SELECT * FROM coins WHERE (:setId IS NULL OR setId = :setId) ORDER BY estimatedValueMean ASC")
+    @Query("SELECT * FROM coins WHERE (:setId IS NULL OR setId = :setId) ORDER BY estimatedValueMean IS NULL, estimatedValueMean ASC")
     fun pagingSourceByValueLowToHigh(setId: String?): PagingSource<Int, CoinEntity>
 
-    @Query("SELECT * FROM coins WHERE (:setId IS NULL OR setId = :setId) ORDER BY year DESC")
+    @Query("SELECT * FROM coins WHERE (:setId IS NULL OR setId = :setId) ORDER BY year IS NULL, year DESC")
     fun pagingSourceByReleaseYearNewToOld(setId: String?): PagingSource<Int, CoinEntity>
 
-    @Query("SELECT * FROM coins WHERE (:setId IS NULL OR setId = :setId) ORDER BY year ASC")
+    @Query("SELECT * FROM coins WHERE (:setId IS NULL OR setId = :setId) ORDER BY year IS NULL, year ASC")
     fun pagingSourceByReleaseYearOldToNew(setId: String?): PagingSource<Int, CoinEntity>
 
     fun pagingSourceWithSort(

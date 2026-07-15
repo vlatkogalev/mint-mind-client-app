@@ -7,8 +7,6 @@ import mintmind.shared.generated.resources.collection_sort_date_created_new_to_o
 import mintmind.shared.generated.resources.collection_sort_date_created_old_to_new
 import mintmind.shared.generated.resources.collection_sort_date_updated_new_to_old
 import mintmind.shared.generated.resources.collection_sort_date_updated_old_to_new
-import mintmind.shared.generated.resources.collection_sort_name_a_to_z
-import mintmind.shared.generated.resources.collection_sort_name_z_to_a
 import mintmind.shared.generated.resources.collection_sort_total_value_high_to_low
 import mintmind.shared.generated.resources.collection_sort_total_value_low_to_high
 import org.jetbrains.compose.resources.StringResource
@@ -24,14 +22,6 @@ enum class CoinSetSortOption(
     DATE_CREATED_OLD_TO_NEW(
         wireValue = "DATE_CREATED_OLD_TO_NEW",
         label = Res.string.collection_sort_date_created_old_to_new,
-    ),
-    NAME_A_TO_Z(
-        wireValue = "NAME_A_TO_Z",
-        label = Res.string.collection_sort_name_a_to_z,
-    ),
-    NAME_Z_TO_A(
-        wireValue = "NAME_Z_TO_A",
-        label = Res.string.collection_sort_name_z_to_a,
     ),
     DATE_UPDATED_NEW_TO_OLD(
         wireValue = "DATE_UPDATED_NEW_TO_OLD",
