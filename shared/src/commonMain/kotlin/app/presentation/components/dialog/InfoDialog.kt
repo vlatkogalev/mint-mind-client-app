@@ -1,16 +1,13 @@
-package app.presentation.components
+package app.presentation.components.dialog
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import app.presentation.theme.AppTheme
 import mintmind.shared.generated.resources.Res
@@ -18,7 +15,7 @@ import mintmind.shared.generated.resources.ok
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun ConfirmDialog(
+fun InfoDialog(
     title: String,
     text: String,
     buttonText: String,
@@ -28,41 +25,25 @@ fun ConfirmDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismissAction,
-        icon = {
-            imageVector?.let { vector ->
-                Icon(
-                    imageVector = vector,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-        },
-        title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            Text(text = text)
-        },
+        icon = { imageVector?.let { AppDialogIcon(it) } },
+        title = { AppDialogTitle(title) },
+        text = { Text(text = text) },
         dismissButton = {
-            TextButton(onClick = { onDismissAction() }) {
+            TextButton(onClick = onDismissAction) {
                 Text(text = buttonText)
             }
         },
         confirmButton = {},
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = AppDialogDefaults.containerColor,
         modifier = modifier
     )
 }
 
 @Preview
 @Composable
-private fun ConfirmDialogPreview() {
+private fun InfoDialogPreview() {
     AppTheme {
-        ConfirmDialog(
+        InfoDialog(
             title = "Confirm",
             text = "Action is done",
             buttonText = stringResource(Res.string.ok),

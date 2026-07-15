@@ -43,10 +43,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.presentation.components.AppTopBar
 import app.presentation.components.PrimaryButton
-import app.presentation.components.RedirectDialog
 import app.presentation.components.ReededDivider
 import app.presentation.components.SectionTitle
 import app.presentation.components.TopAppBarText
+import app.presentation.components.dialog.RedirectDialog
 import app.presentation.theme.AppTheme
 import app.presentation.theme.AppThemeExt
 import app.presentation.util.calculateGridConfig

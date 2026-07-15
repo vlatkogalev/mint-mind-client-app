@@ -33,9 +33,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.presentation.components.AppTopBar
 import app.presentation.components.FormTextField
-import app.presentation.components.GeneralDialog
 import app.presentation.components.PrimaryButton
 import app.presentation.components.SecondaryButton
+import app.presentation.components.dialog.ConfirmDialog
 import app.presentation.theme.AppTheme
 import app.presentation.util.calculateAdaptiveWidth
 import app.presentation.util.cutoutAwarePadding
@@ -149,7 +149,7 @@ fun LoginScreen(
     }
 
     if (state.showVerificationDialog) {
-        GeneralDialog(
+        ConfirmDialog(
             title = stringResource(Res.string.login_verification_title),
             text = stringResource(Res.string.login_verification_text),
             positiveButtonText = stringResource(Res.string.login_verification_resend),

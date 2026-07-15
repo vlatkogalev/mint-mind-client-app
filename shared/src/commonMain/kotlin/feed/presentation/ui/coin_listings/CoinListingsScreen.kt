@@ -34,8 +34,8 @@ import androidx.paging.compose.itemKey
 import androidx.window.core.layout.WindowSizeClass
 import app.presentation.components.AppTopBar
 import app.presentation.components.EmptyContent
-import app.presentation.components.RedirectDialog
 import app.presentation.components.TopAppBarText
+import app.presentation.components.dialog.RedirectDialog
 import app.presentation.theme.AppTheme
 import app.presentation.util.calculateGridConfig
 import app.presentation.util.cutoutAwarePaddingValues

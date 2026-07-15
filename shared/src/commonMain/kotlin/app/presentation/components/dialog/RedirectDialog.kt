@@ -1,18 +1,15 @@
-package app.presentation.components
+package app.presentation.components.dialog
 
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.OpenInBrowser
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import app.presentation.theme.AppTheme
 import mintmind.shared.generated.resources.Res
@@ -25,27 +22,15 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun RedirectDialog(
     uri: String,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        icon = {
-            Icon(
-                imageVector = Icons.Outlined.OpenInBrowser,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
-            )
-        },
-        title = {
-            Text(
-                text = stringResource(Res.string.redirect_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-        },
+        icon = { AppDialogIcon(Icons.Outlined.OpenInBrowser) },
+        title = { AppDialogTitle(stringResource(Res.string.redirect_title)) },
         text = {
             LazyColumn {
                 item {
@@ -56,7 +41,7 @@ fun RedirectDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = { onDismissRequest() }) {
+            TextButton(onClick = onDismissRequest) {
                 Text(stringResource(Res.string.cancel))
             }
         },
@@ -70,7 +55,7 @@ fun RedirectDialog(
                 Text(stringResource(Res.string.ok))
             }
         },
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+        containerColor = AppDialogDefaults.containerColor,
         modifier = modifier
     )
 }

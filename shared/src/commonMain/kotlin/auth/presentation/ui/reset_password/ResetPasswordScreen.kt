@@ -28,9 +28,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.presentation.components.AppTopBar
-import app.presentation.components.ConfirmDialog
 import app.presentation.components.FormTextField
 import app.presentation.components.PrimaryButton
+import app.presentation.components.dialog.InfoDialog
 import app.presentation.theme.AppTheme
 import app.presentation.util.calculateAdaptiveWidth
 import app.presentation.util.cutoutAwarePadding
@@ -124,7 +124,7 @@ fun ResetPasswordScreen(
         }
 
         if (state.showConfirmDialog) {
-            ConfirmDialog(
+            InfoDialog(
                 title = stringResource(Res.string.forgot_password_screen_title),
                 text = stringResource(Res.string.forgot_password_request_successful),
                 buttonText = stringResource(Res.string.ok),

@@ -31,8 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.presentation.components.AppTopBar
-import app.presentation.components.GeneralDialog
-import app.presentation.components.RedirectDialog
+import app.presentation.components.dialog.ConfirmDialog
+import app.presentation.components.dialog.RedirectDialog
 import app.presentation.theme.AppTheme
 import app.presentation.util.calculateGridConfig
 import app.presentation.util.cutoutAwarePadding
@@ -87,7 +87,6 @@ fun UserScreen(
         state.redirectUri?.let { uri ->
             RedirectDialog(
                 uri = uri,
-                modifier = Modifier,
                 onDismissRequest = {
                     onScreenAction(UserScreenAction.ToggleRedirectDialog(null))
                 }
@@ -96,7 +95,7 @@ fun UserScreen(
     }
 
     if (state.showLogoutDialog) {
-        GeneralDialog(
+        ConfirmDialog(
             title = stringResource(Res.string.user_logout),
             text = stringResource(Res.string.user_logout_message),
             positiveButtonText = stringResource(Res.string.user_logout),

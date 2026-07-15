@@ -38,10 +38,10 @@ import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import app.presentation.components.AppTopBar
 import app.presentation.components.BottomBarButton
-import app.presentation.components.ConfirmDialog
 import app.presentation.components.FormTextField
 import app.presentation.components.SectionTitle
 import app.presentation.components.TopAppBarText
+import app.presentation.components.dialog.InfoDialog
 import app.presentation.theme.AppTheme
 import app.presentation.util.cutoutAwarePadding
 import auth.presentation.components.PasswordTextField
@@ -109,7 +109,7 @@ fun RegisterScreen(
     }
 
     if (state.showConfirmDialog) {
-        ConfirmDialog(
+        InfoDialog(
             title = stringResource(Res.string.user_register_screen_title),
             text = stringResource(Res.string.user_register_success_message),
             buttonText = stringResource(Res.string.ok),

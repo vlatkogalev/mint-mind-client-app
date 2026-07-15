@@ -19,7 +19,6 @@ import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.CreateNewFolder
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.FormatLineSpacing
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -37,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import app.presentation.components.EmptyContent
+import app.presentation.components.dialog.ConfirmDialog
 import app.presentation.util.calculateGridConfig
 import collections.domain.model.CoinSet
 import collections.domain.model.CoinSetSortOption
@@ -107,37 +107,18 @@ fun CollectionSetsTab(
         }
 
         if (state.showDeleteSetsDialog) {
-            DeleteSetsDialog(
-                onConfirm = { onAction(CollectionScreenAction.ConfirmDeleteSelectedSets) },
-                onDismiss = { onAction(CollectionScreenAction.DismissDeleteDialog) },
+            ConfirmDialog(
+                title = stringResource(Res.string.collection_delete_sets_title),
+                text = stringResource(Res.string.collection_delete_sets_text),
+                positiveButtonText = stringResource(Res.string.collection_remove_item),
+                negativeButtonText = stringResource(Res.string.cancel),
+                imageVector = Icons.Outlined.Delete,
+                isDestructive = true,
+                onConfirmAction = { onAction(CollectionScreenAction.ConfirmDeleteSelectedSets) },
+                onDismissRequest = { onAction(CollectionScreenAction.DismissDeleteDialog) },
             )
         }
     }
-}
-
-@Composable
-private fun DeleteSetsDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(Res.string.collection_delete_sets_title)) },
-        text = { Text(text = stringResource(Res.string.collection_delete_sets_text)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(
-                    text = stringResource(Res.string.collection_remove_item),
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(text = stringResource(Res.string.cancel))
-            }
-        }
-    )
 }
 
 @Composable
