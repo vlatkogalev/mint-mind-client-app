@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,12 +15,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.presentation.theme.AppTheme
@@ -37,8 +40,8 @@ fun MoveToSetSheet(
     modifier: Modifier = Modifier,
     title: String = stringResource(Res.string.collection_move_to),
     onSelectSet: (setId: String) -> Unit,
-    onCreateNewSet: () -> Unit,
     onDismiss: () -> Unit,
+    onCreateNewSet: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -47,9 +50,29 @@ fun MoveToSetSheet(
         sheetState = sheetState,
         modifier = modifier,
     ) {
+        MoveToSetSheetContent(
+            sets = sets,
+            title = title,
+            onSelectSet = onSelectSet,
+            onDismiss = onDismiss,
+            onCreateNewSet = onCreateNewSet,
+        )
+    }
+}
+
+@Composable
+private fun MoveToSetSheetContent(
+    sets: List<CoinSet>,
+    title: String,
+    onSelectSet: (setId: String) -> Unit,
+    onDismiss: () -> Unit,
+    onCreateNewSet: () -> Unit,
+) {
+    Column(modifier = Modifier.navigationBarsPadding()) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold,
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
         )
 
@@ -93,56 +116,60 @@ fun MoveToSetSheet(
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
 @Preview
 @Composable
-private fun MoveToSetSheetPopulatedPreview() {
+private fun MoveToSetSheetContentPopulatedPreview() {
     AppTheme {
-        MoveToSetSheet(
-            sets = listOf(
-                CoinSet(
-                    id = "1",
-                    name = "My Collection",
-                    description = null,
-                    previewObverseUrls = emptyList(),
-                    coinCount = 5,
-                    totalValue = 100.0,
-                    issuerCount = 3,
-                    createdAt = 0L,
-                    updatedAt = 0L
+        Surface {
+            MoveToSetSheetContent(
+                sets = listOf(
+                    CoinSet(
+                        id = "1",
+                        name = "My Collection",
+                        description = null,
+                        previewObverseUrls = emptyList(),
+                        coinCount = 5,
+                        totalValue = 100.0,
+                        issuerCount = 3,
+                        createdAt = 0L,
+                        updatedAt = 0L
+                    ),
+                    CoinSet(
+                        id = "2",
+                        name = "Rare Coins",
+                        description = null,
+                        previewObverseUrls = emptyList(),
+                        coinCount = 12,
+                        totalValue = 500.0,
+                        issuerCount = 5,
+                        createdAt = 0L,
+                        updatedAt = 0L
+                    ),
                 ),
-                CoinSet(
-                    id = "2",
-                    name = "Rare Coins",
-                    description = null,
-                    previewObverseUrls = emptyList(),
-                    coinCount = 12,
-                    totalValue = 500.0,
-                    issuerCount = 5,
-                    createdAt = 0L,
-                    updatedAt = 0L
-                ),
-            ),
-            onSelectSet = {},
-            onCreateNewSet = {},
-            onDismiss = {},
-        )
+                title = stringResource(Res.string.collection_move_to),
+                onSelectSet = {},
+                onDismiss = {},
+                onCreateNewSet = {},
+            )
+        }
     }
 }
 
 @Preview
 @Composable
-private fun MoveToSetSheetEmptyPreview() {
+private fun MoveToSetSheetContentEmptyPreview() {
     AppTheme {
-        MoveToSetSheet(
-            sets = emptyList(),
-            onSelectSet = {},
-            onCreateNewSet = {},
-            onDismiss = {},
-        )
+        Surface {
+            MoveToSetSheetContent(
+                sets = emptyList(),
+                title = stringResource(Res.string.collection_move_to),
+                onSelectSet = {},
+                onDismiss = {},
+                onCreateNewSet = {},
+            )
+        }
     }
 }

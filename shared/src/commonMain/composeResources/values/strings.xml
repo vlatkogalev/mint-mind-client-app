@@ -121,6 +121,9 @@
     <string name="collection_filter_years">Years</string>
     <string name="collection_move_item">Move</string>
     <string name="collection_remove_item">Delete</string>
+    <string name="collection_remove_from_set">Remove from set</string>
+    <string name="collection_remove_from_set_title">Remove from Set</string>
+    <string name="collection_remove_from_set_text">Are you sure you want to remove the selected coins from this set?</string>
     <string name="collection_delete_coins_title">Delete Coins</string>
     <string name="collection_delete_coins_text">Are you sure you want to delete the selected coins?</string>
     <string name="collection_delete_sets_title">Delete Sets</string>

@@ -23,7 +23,8 @@ class CoinRemoteMediator(
     private val db: AppDatabase,
     private val limit: Int,
     private val sortBy: String,
-    private val queryKey: String = "$DEFAULT_QUERY_KEY:$sortBy",
+    private val setId: String? = null,
+    private val queryKey: String = "${setId ?: DEFAULT_QUERY_KEY}:$sortBy",
 ) : RemoteMediator<Int, CoinEntity>() {
 
     override suspend fun initialize(): InitializeAction {
@@ -47,6 +48,7 @@ class CoinRemoteMediator(
                 httpClient.get(urlString = constructUrl("/coins")) {
                     parameter("limit", limit)
                     parameter("sortBy", sortBy)
+                    setId?.let { parameter("setId", it) }
                 }
             }
 
@@ -59,8 +61,15 @@ class CoinRemoteMediator(
 
                 is NetworkResult.Success -> {
                     val entities = response.data.toCoinEntities()
-                    db.coinDao().replaceAll(entities)
-                    db.coinPagingStateDao().clearAll()
+                    db.coinPagingStateDao().clear(queryKey)
+                    if (setId == null) {
+                        db.coinDao().replaceAll(entities)
+                    } else {
+                        db.coinDao().upsertAll(entities)
+                        if (response.data.nextCursor == null) {
+                            db.coinDao().clearSetIdForCoinsNotIn(setId, entities.map { it.id })
+                        }
+                    }
                     db.coinPagingStateDao().upsert(
                         CoinPagingStateEntity(
                             queryKey = queryKey,
@@ -92,6 +101,7 @@ class CoinRemoteMediator(
                     parameter("limit", limit)
                     parameter("cursor", cursor)
                     parameter("sortBy", sortBy)
+                    setId?.let { parameter("setId", it) }
                 }
             }
 

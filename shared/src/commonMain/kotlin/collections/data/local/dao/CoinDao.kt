@@ -55,6 +55,9 @@ interface CoinDao {
     @Query("UPDATE coins SET setId = :setId WHERE id IN (:ids)")
     suspend fun setSetIdForIds(ids: List<String>, setId: String?)
 
+    @Query("UPDATE coins SET setId = NULL WHERE setId = :setId AND id NOT IN (:ids)")
+    suspend fun clearSetIdForCoinsNotIn(setId: String, ids: List<String>)
+
     @Transaction
     suspend fun replaceAll(coins: List<CoinEntity>) {
         clearAll()

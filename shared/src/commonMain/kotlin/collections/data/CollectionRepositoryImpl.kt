@@ -34,6 +34,7 @@ import collections.data.remote.mapper.toCoinDataEntity
 import collections.data.remote.mapper.toCoinDetailsEntity
 import collections.data.remote.mapper.toCoinSet
 import collections.data.remote.mapper.toCoinSetEntities
+import collections.data.remote.mapper.toCoinSetEntity
 import collections.data.remote.mapper.toCollectionHighlightsEntities
 import collections.data.remote.mapper.toCollectionStatsEntity
 import collections.domain.CollectionRepository
@@ -79,15 +80,19 @@ class CollectionRepositoryImpl(
         collectionStatsDao.getCollectionStats().map { it?.toCollectionStats() }
 
     @OptIn(ExperimentalPagingApi::class)
-    override fun getCoins(sortBy: CoinSortOption, limit: Int): Flow<PagingData<Coin>> =
+    override fun getCoins(
+        sortBy: CoinSortOption,
+        limit: Int,
+        setId: String?,
+    ): Flow<PagingData<Coin>> =
         Pager(
             config = PagingConfig(
                 pageSize = limit,
                 initialLoadSize = limit,
                 enablePlaceholders = false,
             ),
-            remoteMediator = CoinRemoteMediator(httpClient, db, limit, sortBy.wireValue),
-            pagingSourceFactory = { coinDao.pagingSourceWithSort(setId = null, sortBy) }
+            remoteMediator = CoinRemoteMediator(httpClient, db, limit, sortBy.wireValue, setId),
+            pagingSourceFactory = { coinDao.pagingSourceWithSort(setId, sortBy) }
         ).flow.map { pagingData -> pagingData.map { it.toCoin() } }
 
     override suspend fun storeCoinDetails(id: String): EmptyNetworkResult<NetworkError> {
@@ -171,4 +176,31 @@ class CollectionRepositoryImpl(
             storeCollectionStats()
         }.asEmptyDataNetworkResult()
     }
+
+    override suspend fun removeCoinsFromSet(
+        setId: String,
+        coinIds: List<String>
+    ): EmptyNetworkResult<NetworkError> {
+        return safeCall<CoinSetDto> {
+            httpClient.delete(urlString = constructUrl("/sets/$setId/coins")) {
+                setBody(ModifySetCoinsRequest(coinIds = coinIds))
+            }
+        }.map {
+            coinDao.setSetIdForIds(coinIds, null)
+            storeSets()
+            storeCollectionStats()
+            storeSet(setId)
+        }.asEmptyDataNetworkResult()
+    }
+
+    override suspend fun storeSet(setId: String): EmptyNetworkResult<NetworkError> {
+        return safeCall<CoinSetDto> {
+            httpClient.get(urlString = constructUrl("/sets/$setId"))
+        }.map { dto ->
+            coinSetDao.upsertAll(listOf(dto.toCoinSetEntity()))
+        }.asEmptyDataNetworkResult()
+    }
+
+    override fun getSet(setId: String): Flow<CoinSet?> =
+        coinSetDao.getSet(setId).map { it?.toCoinSet() }
 }

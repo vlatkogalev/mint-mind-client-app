@@ -19,6 +19,7 @@ interface CollectionRepository {
     fun getCoins(
         sortBy: CoinSortOption = CoinSortOption.DEFAULT,
         limit: Int = 20,
+        setId: String? = null,
     ): Flow<PagingData<Coin>>
     suspend fun storeCoinDetails(id: String): EmptyNetworkResult<NetworkError>
     fun getCoinDetails(id: String): Flow<CoinDetails?>
@@ -29,11 +30,17 @@ interface CollectionRepository {
     fun getSets(
         sortBy: CoinSetSortOption = CoinSetSortOption.DEFAULT,
     ): Flow<List<CoinSet>>
+    suspend fun storeSet(setId: String): EmptyNetworkResult<NetworkError>
+    fun getSet(setId: String): Flow<CoinSet?>
     suspend fun createSet(name: String, description: String?): EmptyNetworkResult<NetworkError>
     suspend fun deleteCoins(coinIds: List<String>): NetworkResult<BulkDeleteResponse, NetworkError>
     suspend fun deleteSets(setIds: List<String>): NetworkResult<BulkDeleteResponse, NetworkError>
     suspend fun moveCoinsToSet(
         targetSetId: String,
+        coinIds: List<String>
+    ): EmptyNetworkResult<NetworkError>
+    suspend fun removeCoinsFromSet(
+        setId: String,
         coinIds: List<String>
     ): EmptyNetworkResult<NetworkError>
 }

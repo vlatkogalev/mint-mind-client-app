@@ -8,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import androidx.paging.compose.collectAsLazyPagingItems
 import app.navigation.Screen
 import collections.presentation.ui.coin.CoinScreen
 import collections.presentation.ui.coin.CoinScreenAction
@@ -45,16 +46,24 @@ fun NavGraphBuilder.collectionScreens(
 
         val viewModel = koinViewModel<SetViewModel> { parametersOf(args.id) }
         val state by viewModel.state.collectAsStateWithLifecycle()
+        val coins = viewModel.coinsPagingFlow.collectAsLazyPagingItems()
         val snackbarHostState = remember { SnackbarHostState() }
 
         SetScreen(
             state = state,
+            coins = coins,
+            events = viewModel.events,
             snackbarHostState = snackbarHostState
         ) { action ->
             when (action) {
                 is SetScreenAction.NavigateUp -> {
                     navController.navigateUp()
                 }
+                is SetScreenAction.NavigateToCoin -> {
+                    navController.navigate(Screen.Coin(action.coinId))
+                }
+
+                else -> viewModel.onScreenAction(action)
             }
         }
     }

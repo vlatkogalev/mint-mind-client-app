@@ -35,6 +35,9 @@ interface CoinSetDao {
     @Query("SELECT * FROM coin_sets ORDER BY totalValue ASC")
     fun getAllSetsByTotalValueLowToHigh(): Flow<List<CoinSetEntity>>
 
+    @Query("SELECT * FROM coin_sets WHERE id = :setId")
+    fun getSet(setId: String): Flow<CoinSetEntity?>
+
     fun getAllSets(sortBy: CoinSetSortOption): Flow<List<CoinSetEntity>> {
         return when (sortBy) {
             CoinSetSortOption.DATE_CREATED_NEW_TO_OLD -> getAllSets()
