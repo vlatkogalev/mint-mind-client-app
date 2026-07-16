@@ -46,9 +46,12 @@ interface CollectionRepository {
     ): EmptyNetworkResult<NetworkError>
 
     /**
-     * Wipes all user-scoped local collection data. Must be called on every
-     * session boundary (logout, login, account upgrade) BEFORE the new
-     * session's data is fetched. Does not touch public caches (news, listings).
+     * Wipes all user-scoped local collection data. Must be called on session
+     * boundaries where the effective user identity changes (logout, login).
+     *
+     * Account upgrade is intentionally excluded — the userId is preserved
+     * and there is no server-side data merge, so clearing would incorrectly
+     * show an empty collection for a freshly registered user.
      */
     suspend fun clearUserData()
 

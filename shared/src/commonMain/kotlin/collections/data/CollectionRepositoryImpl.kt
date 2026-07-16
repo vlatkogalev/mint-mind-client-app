@@ -14,6 +14,8 @@ import app.domain.model.EmptyNetworkResult
 import app.domain.model.NetworkResult
 import app.domain.model.asEmptyDataNetworkResult
 import app.domain.model.map
+import app.domain.model.onError
+import app.domain.toErrorMessage
 import collections.data.local.dao.CoinDao
 import collections.data.local.dao.CoinDetailsDao
 import collections.data.local.dao.CoinPagingStateDao
@@ -50,6 +52,7 @@ import collections.domain.model.CoinSet
 import collections.domain.model.CoinSetSortOption
 import collections.domain.model.CoinSortOption
 import collections.domain.model.CollectionStats
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
@@ -241,8 +244,20 @@ class CollectionRepositoryImpl(
             }
         }.map { dto ->
             coinDao.upsertAll(listOf(dto.toCoinEntity()))
-            appScope.launch { storeCollectionStats() }
-            appScope.launch { storeSets() }
+            appScope.launch {
+                storeCollectionStats().onError {
+                    Napier.w(
+                        "Failed to refresh collection stats after save: ${
+                            it.toErrorMessage().asString()
+                        }"
+                    )
+                }
+            }
+            appScope.launch {
+                storeSets().onError {
+                    Napier.w("Failed to refresh sets after save: ${it.toErrorMessage().asString()}")
+                }
+            }
         }.asEmptyDataNetworkResult()
     }
 }
