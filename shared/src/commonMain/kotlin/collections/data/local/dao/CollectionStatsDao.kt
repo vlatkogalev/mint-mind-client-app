@@ -25,6 +25,15 @@ interface CollectionStatsDao {
     @Query("DELETE FROM collection_highlights")
     suspend fun deleteAllHighlights()
 
+    @Query("DELETE FROM collection_stats")
+    suspend fun deleteAllStats()
+
+    @Transaction
+    suspend fun clearAll() {
+        deleteAllStats()
+        deleteAllHighlights()
+    }
+
     @Transaction
     suspend fun upsertCollectionStats(
         stats: CollectionStatsEntity,

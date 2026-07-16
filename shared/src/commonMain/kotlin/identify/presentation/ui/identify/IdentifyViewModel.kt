@@ -9,12 +9,12 @@ import app.Const
 import app.domain.model.NetworkResult
 import app.domain.model.Resource
 import app.domain.toErrorMessage
+import collections.domain.CollectionRepository
 import com.kashif.cameraK.controller.CameraController
 import com.kashif.cameraK.enums.FlashMode
 import com.kashif.cameraK.result.ImageCaptureResult
 import identify.data.AIProvider
 import identify.data.remote.mapper.toSaveToCollectionRequest
-import identify.domain.IdentifyRepository
 import identify.domain.model.CaptureTarget
 import identify.presentation.util.deleteFileAtPath
 import identify.presentation.util.processCapturedImage
@@ -37,7 +37,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class IdentifyViewModel(
     private val aiProvider: AIProvider,
-    private val identifyRepository: IdentifyRepository,
+    private val collectionRepository: CollectionRepository,
     private val storageRepository: StorageRepository,
 ) : ViewModel() {
 
@@ -434,7 +434,7 @@ class IdentifyViewModel(
             reverseKey = reverseUpload.objectKey
         )
 
-        when (val saveResult = identifyRepository.saveToCollection(request)) {
+        when (val saveResult = collectionRepository.saveToCollection(request)) {
             is NetworkResult.Success -> {
                 _state.update { it.copy(isAddingToCollection = false) }
                 resetSession()

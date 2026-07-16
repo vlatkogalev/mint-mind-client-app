@@ -48,6 +48,11 @@ class CollectionViewModel(
         viewModelScope.launch { collectionRepository.storeCollectionStats() }
     }
 
+    fun onScreenResumed() {
+        viewModelScope.launch { collectionRepository.storeCollectionStats() }
+        viewModelScope.launch { collectionRepository.storeSets(setSort.value) }
+    }
+
     private fun observeCollectionStats() {
         collectionRepository.getCollectionStats()
             .onEach { stats ->

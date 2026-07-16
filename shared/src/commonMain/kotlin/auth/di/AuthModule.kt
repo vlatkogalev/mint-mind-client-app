@@ -10,7 +10,13 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val authModule = module {
-    single<AuthRepository> { AuthRepositoryImpl(get(qualifier = named("AuthClient")), get()) }
+    single<AuthRepository> {
+        AuthRepositoryImpl(
+            get(qualifier = named("AuthClient")),
+            get(),
+            get()
+        )
+    }
 
     viewModel { LoginViewModel(get(), get(), get()) }
     viewModel {

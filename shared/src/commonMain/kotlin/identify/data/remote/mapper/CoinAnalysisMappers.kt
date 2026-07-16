@@ -1,7 +1,7 @@
 package identify.data.remote.mapper
 
+import collections.data.remote.dto.SaveToCollectionRequest
 import identify.data.remote.dto.CoinAnalysisDto
-import identify.data.remote.dto.SaveToCollectionRequest
 import kotlinx.serialization.json.Json
 
 fun CoinAnalysisDto.toSaveToCollectionRequest(

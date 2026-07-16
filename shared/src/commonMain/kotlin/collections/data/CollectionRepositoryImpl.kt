@@ -27,11 +27,14 @@ import collections.data.remote.dto.CoinSetDto
 import collections.data.remote.dto.CollectionStatsDto
 import collections.data.remote.dto.CreateCoinSetRequest
 import collections.data.remote.dto.ModifySetCoinsRequest
+import collections.data.remote.dto.SaveToCollectionDto
+import collections.data.remote.dto.SaveToCollectionRequest
 import collections.data.remote.mapper.toAiAnalysisEntity
 import collections.data.remote.mapper.toCatalogueNumberEntities
 import collections.data.remote.mapper.toCoin
 import collections.data.remote.mapper.toCoinDataEntity
 import collections.data.remote.mapper.toCoinDetailsEntity
+import collections.data.remote.mapper.toCoinEntity
 import collections.data.remote.mapper.toCoinSet
 import collections.data.remote.mapper.toCoinSetEntities
 import collections.data.remote.mapper.toCoinSetEntity
@@ -203,4 +206,26 @@ class CollectionRepositoryImpl(
 
     override fun getSet(setId: String): Flow<CoinSet?> =
         coinSetDao.getSet(setId).map { it?.toCoinSet() }
+
+    override suspend fun clearUserData() {
+        coinPagingStateDao.clearAll()
+        coinDao.clearAll()
+        coinSetDao.deleteAll()
+        coinDetailsDao.deleteAll()
+        collectionStatsDao.clearAll()
+    }
+
+    override suspend fun saveToCollection(
+        request: SaveToCollectionRequest
+    ): EmptyNetworkResult<NetworkError> {
+        return safeCall<SaveToCollectionDto> {
+            httpClient.post(urlString = constructUrl("/coins")) {
+                setBody(request)
+            }
+        }.map { dto ->
+            coinDao.upsertAll(listOf(dto.toCoinEntity()))
+            storeCollectionStats()
+            storeSets()
+        }.asEmptyDataNetworkResult()
+    }
 }

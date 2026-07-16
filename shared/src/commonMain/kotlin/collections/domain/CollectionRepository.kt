@@ -5,6 +5,7 @@ import app.domain.NetworkError
 import app.domain.model.EmptyNetworkResult
 import app.domain.model.NetworkResult
 import collections.data.remote.dto.BulkDeleteResponse
+import collections.data.remote.dto.SaveToCollectionRequest
 import collections.domain.model.Coin
 import collections.domain.model.CoinDetails
 import collections.domain.model.CoinSet
@@ -42,5 +43,16 @@ interface CollectionRepository {
     suspend fun removeCoinsFromSet(
         setId: String,
         coinIds: List<String>
+    ): EmptyNetworkResult<NetworkError>
+
+    /**
+     * Wipes all user-scoped local collection data. Must be called on every
+     * session boundary (logout, login, account upgrade) BEFORE the new
+     * session's data is fetched. Does not touch public caches (news, listings).
+     */
+    suspend fun clearUserData()
+
+    suspend fun saveToCollection(
+        request: SaveToCollectionRequest
     ): EmptyNetworkResult<NetworkError>
 }

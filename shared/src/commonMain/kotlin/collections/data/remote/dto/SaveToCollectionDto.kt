@@ -1,4 +1,4 @@
-package identify.data.remote.dto
+package collections.data.remote.dto
 
 
 import kotlinx.serialization.SerialName

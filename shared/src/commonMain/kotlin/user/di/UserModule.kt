@@ -20,7 +20,7 @@ val userModule = module {
     factoryOf(::ValidateConfirmEmailUseCase)
     factoryOf(::ValidatePasswordUseCase)
     factoryOf(::ValidateConfirmPasswordUseCase)
-    factory { LogoutUseCase(get(), get(), coreComponent.tokenManager) }
+    factory { LogoutUseCase(get(), get(), get(), coreComponent.tokenManager) }
 
     viewModel { UserViewModel(get(), get()) }
 }

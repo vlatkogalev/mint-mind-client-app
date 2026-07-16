@@ -3,29 +3,31 @@ package user.domain.usecase
 import app.data.local.TokenManager
 import app.domain.NetworkError
 import app.domain.model.onError
-import app.domain.model.onSuccess
 import auth.domain.AuthRepository
+import collections.domain.CollectionRepository
 import user.domain.UserRepository
 
 class LogoutUseCase(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
+    private val collectionRepository: CollectionRepository,
     private val tokenManager: TokenManager,
 ) {
     suspend operator fun invoke(): LogoutResult {
-        var result: LogoutResult = LogoutResult.Success
+        val serverResult = authRepository.logout()
 
-        authRepository.logout()
-            .onSuccess {
-                tokenManager.deleteTokens()
-                userRepository.clearLocalUserSession()
-                authRepository.authenticateAnonymously()
-                    .onError { error ->
-                        result = LogoutResult.AnonymousAuthFailed(error)
-                    }
-            }
+        tokenManager.deleteTokens()
+        userRepository.clearLocalUserSession()
+        collectionRepository.clearUserData()
+
+        var result: LogoutResult = when (serverResult) {
+            is app.domain.model.NetworkResult.Success -> LogoutResult.Success
+            is app.domain.model.NetworkResult.Error -> LogoutResult.LogoutFailed(serverResult.error)
+        }
+
+        authRepository.authenticateAnonymously()
             .onError { error ->
-                result = LogoutResult.LogoutFailed(error)
+                result = LogoutResult.AnonymousAuthFailed(error)
             }
 
         return result
