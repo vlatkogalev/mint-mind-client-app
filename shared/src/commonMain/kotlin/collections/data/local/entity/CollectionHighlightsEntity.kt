@@ -34,7 +34,7 @@ data class CollectionHighlightsEntity(
 
     val gradeNumeric: Int?,
 
-    val estimatedValueMean: Double,
+    val estimatedValueMean: Double?,
 
     val setId: String?,
 

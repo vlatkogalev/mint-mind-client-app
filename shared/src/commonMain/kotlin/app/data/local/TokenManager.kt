@@ -3,8 +3,10 @@ package app.data.local
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
@@ -19,6 +21,8 @@ interface TokenManager {
     suspend fun saveTokens(token: String, refreshToken: String): Preferences
     suspend fun deleteTokens(): Preferences
     suspend fun getOrCreateInstallationId(): String
+    val sessionEpoch: Flow<Long>
+    suspend fun bumpSessionEpoch()
 }
 
 internal class TokenManagerImpl(
@@ -29,6 +33,7 @@ internal class TokenManagerImpl(
         private val TOKEN_KEY = stringPreferencesKey("jwt_token")
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("jwt_refresh_token")
         private val INSTALLATION_ID_KEY = stringPreferencesKey("installation_id")
+        private val SESSION_EPOCH_KEY = longPreferencesKey("session_epoch")
     }
 
     private val installationIdMutex = Mutex()
@@ -69,6 +74,16 @@ internal class TokenManagerImpl(
             }
             cachedInstallationId = id
             return id
+        }
+    }
+
+    override val sessionEpoch: Flow<Long> = dataStore.data
+        .map { it[SESSION_EPOCH_KEY] ?: 0L }
+        .distinctUntilChanged()
+
+    override suspend fun bumpSessionEpoch() {
+        dataStore.edit { prefs ->
+            prefs[SESSION_EPOCH_KEY] = (prefs[SESSION_EPOCH_KEY] ?: 0L) + 1
         }
     }
 }

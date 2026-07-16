@@ -2,6 +2,7 @@ package user.domain.usecase
 
 import app.data.local.TokenManager
 import app.domain.NetworkError
+import app.domain.model.NetworkResult
 import app.domain.model.onError
 import auth.domain.AuthRepository
 import collections.domain.CollectionRepository
@@ -21,14 +22,16 @@ class LogoutUseCase(
         collectionRepository.clearUserData()
 
         var result: LogoutResult = when (serverResult) {
-            is app.domain.model.NetworkResult.Success -> LogoutResult.Success
-            is app.domain.model.NetworkResult.Error -> LogoutResult.LogoutFailed(serverResult.error)
+            is NetworkResult.Success -> LogoutResult.Success
+            is NetworkResult.Error -> LogoutResult.LogoutFailed(serverResult.error)
         }
 
         authRepository.authenticateAnonymously()
             .onError { error ->
                 result = LogoutResult.AnonymousAuthFailed(error)
             }
+
+        tokenManager.bumpSessionEpoch()
 
         return result
     }

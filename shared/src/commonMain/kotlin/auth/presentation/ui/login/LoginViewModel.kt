@@ -23,8 +23,10 @@ import mintmind.shared.generated.resources.Res
 import mintmind.shared.generated.resources.error_field_empty
 import mintmind.shared.generated.resources.login_verification_resent
 import user.domain.UserRepository
+import user.domain.usecase.LoginUseCase
 
 class LoginViewModel(
+    private val loginUseCase: LoginUseCase,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
     private val validateCommonFieldUseCase: ValidateCommonFieldUseCase,
@@ -86,7 +88,7 @@ class LoginViewModel(
         )
 
         _state.update { it.copy(isLoading = true) }
-        authRepository.login(request)
+        loginUseCase(request)
             .onSuccess {
                 storeUser()
             }

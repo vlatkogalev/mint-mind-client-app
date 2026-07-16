@@ -109,7 +109,8 @@ private fun LazyGridScope.highlightItems(
 
 private fun CollectionStats.HighlightedCoin.highlightValue(): String? =
     when (type) {
-        CollectionStats.HighlightType.MOST_VALUABLE -> "$$estimatedValueMean"
+        CollectionStats.HighlightType.MOST_VALUABLE -> estimatedValueMean?.let { "$$it" }
+            ?: "\u2014"
         CollectionStats.HighlightType.MOST_ANCIENT -> year?.toString()
         CollectionStats.HighlightType.RAREST -> mintage.toString()
     }

@@ -46,7 +46,7 @@ import user.data.local.entity.UserEntity
         CoinEntity::class,
         CoinPagingStateEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

@@ -15,7 +15,6 @@ import auth.domain.model.request.CreateUserRequest
 import auth.domain.model.request.LoginRequest
 import auth.domain.model.request.ResendVerificationRequest
 import auth.domain.model.request.ResetPasswordRequest
-import collections.domain.CollectionRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.authProvider
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
@@ -25,7 +24,6 @@ import io.ktor.client.request.setBody
 class AuthRepositoryImpl(
     private val authClient: HttpClient,
     private val httpClient: HttpClient,
-    private val collectionRepository: CollectionRepository,
 ) : AuthRepository {
 
     override suspend fun authenticateAnonymously(): EmptyNetworkResult<NetworkError> {
@@ -40,30 +38,22 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun upgradeAccount(request: CreateUserRequest): EmptyNetworkResult<NetworkError> {
-        val result = safeCall<LoginDto> {
+        return safeCall<LoginDto> {
             httpClient.post(urlString = constructUrl("/auth/upgrade-account")) {
                 setBody(request)
             }
         }.persistTokens()
-        if (result is NetworkResult.Success) {
-            collectionRepository.clearUserData()
-        }
-        return result
     }
 
     override suspend fun login(request: LoginRequest): EmptyNetworkResult<NetworkError> {
         val installationId = coreComponent.tokenManager.getOrCreateInstallationId()
         val authenticatedRequest = request.copy(installationId = installationId)
 
-        val result = safeCall<LoginDto> {
+        return safeCall<LoginDto> {
             authClient.post(urlString = constructUrl("/auth/login")) {
                 setBody(authenticatedRequest)
             }
         }.persistTokens()
-        if (result is NetworkResult.Success) {
-            collectionRepository.clearUserData()
-        }
-        return result
     }
 
     override suspend fun resendVerification(request: ResendVerificationRequest): EmptyNetworkResult<NetworkError> {

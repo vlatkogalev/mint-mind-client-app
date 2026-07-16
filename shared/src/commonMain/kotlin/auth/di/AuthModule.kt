@@ -13,12 +13,11 @@ val authModule = module {
     single<AuthRepository> {
         AuthRepositoryImpl(
             get(qualifier = named("AuthClient")),
-            get(),
             get()
         )
     }
 
-    viewModel { LoginViewModel(get(), get(), get()) }
+    viewModel { LoginViewModel(get(), get(), get(), get()) }
     viewModel {
         RegisterViewModel(
             get(),

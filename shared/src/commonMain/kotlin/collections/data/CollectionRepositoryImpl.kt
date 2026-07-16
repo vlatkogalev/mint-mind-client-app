@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
 import app.data.local.AppDatabase
+import app.data.local.TokenManager
 import app.data.remote.constructUrl
 import app.data.remote.safeCall
 import app.domain.NetworkError
@@ -55,12 +56,18 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class CollectionRepositoryImpl(
     private val httpClient: HttpClient,
-    private val db: AppDatabase
+    private val db: AppDatabase,
+    private val tokenManager: TokenManager,
+    private val appScope: CoroutineScope,
 ) : CollectionRepository {
     private val coinDetailsDao: CoinDetailsDao = db.coinDetailsDao()
     private val collectionStatsDao: CollectionStatsDao = db.collectionStatsDao()
@@ -82,21 +89,31 @@ class CollectionRepositoryImpl(
     override fun getCollectionStats(): Flow<CollectionStats?> =
         collectionStatsDao.getCollectionStats().map { it?.toCollectionStats() }
 
-    @OptIn(ExperimentalPagingApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class, ExperimentalPagingApi::class)
     override fun getCoins(
         sortBy: CoinSortOption,
         limit: Int,
         setId: String?,
     ): Flow<PagingData<Coin>> =
-        Pager(
-            config = PagingConfig(
-                pageSize = limit,
-                initialLoadSize = limit,
-                enablePlaceholders = false,
-            ),
-            remoteMediator = CoinRemoteMediator(httpClient, db, limit, sortBy.wireValue, setId),
-            pagingSourceFactory = { coinDao.pagingSourceWithSort(setId, sortBy) }
-        ).flow.map { pagingData -> pagingData.map { it.toCoin() } }
+        tokenManager.sessionEpoch
+            .flatMapLatest {
+                Pager(
+                    config = PagingConfig(
+                        pageSize = limit,
+                        initialLoadSize = limit,
+                        enablePlaceholders = false,
+                    ),
+                    remoteMediator = CoinRemoteMediator(
+                        httpClient,
+                        db,
+                        limit,
+                        sortBy.wireValue,
+                        setId
+                    ),
+                    pagingSourceFactory = { coinDao.pagingSourceWithSort(setId, sortBy) }
+                ).flow
+            }
+            .map { pagingData -> pagingData.map { it.toCoin() } }
 
     override suspend fun storeCoinDetails(id: String): EmptyNetworkResult<NetworkError> {
         return safeCall<CoinDto> {
@@ -224,8 +241,8 @@ class CollectionRepositoryImpl(
             }
         }.map { dto ->
             coinDao.upsertAll(listOf(dto.toCoinEntity()))
-            storeCollectionStats()
-            storeSets()
+            appScope.launch { storeCollectionStats() }
+            appScope.launch { storeSets() }
         }.asEmptyDataNetworkResult()
     }
 }

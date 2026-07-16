@@ -8,7 +8,7 @@ import collections.data.remote.dto.SaveToCollectionDto
  * immediately on the Collection screen without waiting for a [CoinRemoteMediator] refresh.
  *
  * Fields absent from the save response (thumbnail URLs, estimatedValueMean) are set to
- * null / zero. The next mediator refresh overwrites the row via @Upsert on the primary
+ * null. The next mediator refresh overwrites the row via @Upsert on the primary
  * key, filling in enriched values from the list endpoint.
  */
 fun SaveToCollectionDto.toCoinEntity(): CoinEntity =
@@ -25,7 +25,7 @@ fun SaveToCollectionDto.toCoinEntity(): CoinEntity =
         gradeName = recognitionResult?.gradeName ?: "",
         gradeAbbreviation = recognitionResult?.gradeAbbreviation,
         gradeNumeric = recognitionResult?.gradeNumeric,
-        estimatedValueMean = 0.0,
+        estimatedValueMean = null,
         setId = setId,
         createdAt = createdAt
     )

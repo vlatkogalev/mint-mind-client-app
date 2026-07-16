@@ -83,7 +83,7 @@ fun CoinItem(
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "$${coin.estimatedValueMean}",
+                    text = coin.estimatedValueMean?.let { "$$it" } ?: "\u2014",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary,

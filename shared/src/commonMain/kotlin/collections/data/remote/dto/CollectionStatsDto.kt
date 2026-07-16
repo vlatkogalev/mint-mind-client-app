@@ -62,7 +62,7 @@ data class CollectionStatsDto(
             val gradeNumeric: Int?,
 
             @SerialName("estimatedValueMean")
-            val estimatedValueMean: Double,
+            val estimatedValueMean: Double? = null,
 
             @SerialName("setId")
             val setId: String?,

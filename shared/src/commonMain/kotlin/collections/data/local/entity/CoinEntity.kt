@@ -25,7 +25,7 @@ data class CoinEntity(
     val gradeName: String,
     val gradeAbbreviation: String?,
     val gradeNumeric: Int?,
-    val estimatedValueMean: Double,
+    val estimatedValueMean: Double?,
     val setId: String?,
     val createdAt: Long
 )

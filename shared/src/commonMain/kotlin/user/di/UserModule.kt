@@ -6,6 +6,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import user.data.UserRepositoryImpl
 import user.domain.UserRepository
+import user.domain.usecase.LoginUseCase
 import user.domain.usecase.LogoutUseCase
 import user.domain.usecase.ValidateConfirmEmailUseCase
 import user.domain.usecase.ValidateConfirmPasswordUseCase
@@ -20,6 +21,7 @@ val userModule = module {
     factoryOf(::ValidateConfirmEmailUseCase)
     factoryOf(::ValidatePasswordUseCase)
     factoryOf(::ValidateConfirmPasswordUseCase)
+    factory { LoginUseCase(get(), get()) }
     factory { LogoutUseCase(get(), get(), get(), coreComponent.tokenManager) }
 
     viewModel { UserViewModel(get(), get()) }
