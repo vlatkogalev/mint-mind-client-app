@@ -270,8 +270,10 @@ private fun HeroSection(coin: CoinUiModel) {
             }
             .padding(horizontal = 24.dp, vertical = 20.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Box(
                 modifier = Modifier.height(116.dp)
             ) {
@@ -311,8 +313,10 @@ private fun HeroSection(coin: CoinUiModel) {
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Black,
                 color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
             )
 
             Text(
@@ -320,10 +324,11 @@ private fun HeroSection(coin: CoinUiModel) {
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = AppThemeExt.colors.textSecondary,
-                modifier = Modifier.padding(top = 4.dp)
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(8.dp))
 
             val (badgeBg, badgeFg) = when (coin.confidenceLevel) {
                 CoinUiModel.ConfidenceLevel.HIGH -> AppThemeExt.statusColors.verifiedContainer to AppThemeExt.statusColors.verified
@@ -336,7 +341,7 @@ private fun HeroSection(coin: CoinUiModel) {
                 modifier = Modifier
                     .clip(CircleShape)
                     .background(badgeBg)
-                    .padding(horizontal = 14.dp, vertical = 6.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Check,
