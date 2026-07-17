@@ -83,11 +83,17 @@ class SetViewModel(
 
             is SetScreenAction.ConfirmDeleteSelectedCoins -> deleteSelectedCoins()
 
+            is SetScreenAction.RequestDeleteSet ->
+                _state.update { it.copy(showDeleteSetDialog = true) }
+
+            is SetScreenAction.ConfirmDeleteSet -> deleteSet()
+
             is SetScreenAction.DismissDialog ->
                 _state.update {
                     it.copy(
                         showRemoveFromSetDialog = false,
-                        showDeleteCoinsDialog = false
+                        showDeleteCoinsDialog = false,
+                        showDeleteSetDialog = false
                     )
                 }
         }
@@ -149,6 +155,23 @@ class SetViewModel(
                 },
                 onSuccess = { SetScreenEvent.CoinsDeleted(it.deleted) },
             )
+        }
+    }
+
+    private fun deleteSet() {
+        _state.update { it.copy(showDeleteSetDialog = false, isProcessingBulkAction = true) }
+        viewModelScope.launch {
+            when (val result = collectionRepository.deleteSets(listOf(setId))) {
+                is NetworkResult.Success -> {
+                    _state.update { it.copy(isProcessingBulkAction = false) }
+                    _events.send(SetScreenEvent.SetDeleted)
+                }
+
+                is NetworkResult.Error -> {
+                    _state.update { it.copy(isProcessingBulkAction = false) }
+                    _events.send(SetScreenEvent.Error(result.error))
+                }
+            }
         }
     }
 

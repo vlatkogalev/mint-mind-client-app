@@ -35,12 +35,15 @@ fun NavGraphBuilder.collectionScreens(
 
         CoinScreen(
             state = state,
+            events = viewModel.events,
             snackbarHostState = snackbarHostState
         ) { action ->
             when (action) {
                 is CoinScreenAction.NavigateUp -> {
                     navController.navigateUp()
                 }
+
+                else -> viewModel.onScreenAction(action)
             }
         }
     }

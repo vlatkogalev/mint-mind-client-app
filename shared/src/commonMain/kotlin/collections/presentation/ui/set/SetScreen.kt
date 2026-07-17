@@ -16,8 +16,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Feed
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.PlaylistRemove
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -60,6 +63,8 @@ import mintmind.shared.generated.resources.cancel
 import mintmind.shared.generated.resources.collection_coins_deleted
 import mintmind.shared.generated.resources.collection_delete_coins_text
 import mintmind.shared.generated.resources.collection_delete_coins_title
+import mintmind.shared.generated.resources.collection_delete_set_text
+import mintmind.shared.generated.resources.collection_delete_set_title
 import mintmind.shared.generated.resources.collection_remove_from_set
 import mintmind.shared.generated.resources.collection_remove_from_set_text
 import mintmind.shared.generated.resources.collection_remove_from_set_title
@@ -67,6 +72,7 @@ import mintmind.shared.generated.resources.collection_remove_item
 import mintmind.shared.generated.resources.collection_set_coins_deleted
 import mintmind.shared.generated.resources.collection_set_empty_desc
 import mintmind.shared.generated.resources.collection_set_empty_title
+import mintmind.shared.generated.resources.collection_sets_deleted
 import mintmind.shared.generated.resources.set_total_value
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -108,6 +114,14 @@ fun SetScreen(
                 )
             }
 
+            is SetScreenEvent.SetDeleted -> {
+                pluralStringResource(
+                    Res.plurals.collection_sets_deleted,
+                    1,
+                    1
+                )
+            }
+
             is SetScreenEvent.Error -> "An error occurred. Please try again."
 
             is SetScreenEvent.BulkActionBlocked -> event.reason
@@ -116,6 +130,9 @@ fun SetScreen(
         }
 
         LaunchedEffect(event) {
+            if (event is SetScreenEvent.SetDeleted) {
+                onScreenAction(SetScreenAction.NavigateUp)
+            }
             snackbarHostState.showSnackbar(message)
             currentEvent = null
         }
@@ -129,6 +146,14 @@ fun SetScreen(
                 },
                 onNavigateUp = { onScreenAction(SetScreenAction.NavigateUp) },
                 transparent = true,
+                actions = {
+                    IconButton(onClick = { /* TODO */ }) {
+                        Icon(Icons.Outlined.Edit, contentDescription = null)
+                    }
+                    IconButton(onClick = { onScreenAction(SetScreenAction.RequestDeleteSet) }) {
+                        Icon(Icons.Outlined.Delete, contentDescription = null)
+                    }
+                }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -246,6 +271,19 @@ private fun MainContent(
                     imageVector = Icons.Outlined.Delete,
                     isDestructive = true,
                     onConfirmAction = { onScreenAction(SetScreenAction.ConfirmDeleteSelectedCoins) },
+                    onDismissRequest = { onScreenAction(SetScreenAction.DismissDialog) },
+                )
+            }
+
+            if (state.showDeleteSetDialog) {
+                ConfirmDialog(
+                    title = stringResource(Res.string.collection_delete_set_title),
+                    text = stringResource(Res.string.collection_delete_set_text),
+                    positiveButtonText = stringResource(Res.string.collection_remove_item),
+                    negativeButtonText = stringResource(Res.string.cancel),
+                    imageVector = Icons.Outlined.Delete,
+                    isDestructive = true,
+                    onConfirmAction = { onScreenAction(SetScreenAction.ConfirmDeleteSet) },
                     onDismissRequest = { onScreenAction(SetScreenAction.DismissDialog) },
                 )
             }

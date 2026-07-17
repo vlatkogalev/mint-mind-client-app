@@ -36,7 +36,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -60,22 +64,53 @@ import app.presentation.components.ReededDivider
 import app.presentation.theme.AppTheme
 import app.presentation.theme.AppThemeExt
 import coil3.compose.AsyncImage
+import collections.presentation.components.MoveToSetSheet
 import collections.presentation.mapper.dummyCoinUi
 import collections.presentation.model.CoinUiModel
+import kotlinx.coroutines.flow.Flow
 import mintmind.shared.generated.resources.Res
 import mintmind.shared.generated.resources.coin_placeholder
+import mintmind.shared.generated.resources.collection_coins_moved
 import mintmind.shared.generated.resources.identify_coin_side_obverse
 import mintmind.shared.generated.resources.identify_coin_side_reverse
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 
 @Composable
 fun CoinScreen(
     state: CoinState,
+    events: Flow<CoinScreenEvent>,
     snackbarHostState: SnackbarHostState,
     onScreenAction: (CoinScreenAction) -> Unit,
 ) {
+    var currentEvent by remember { mutableStateOf<CoinScreenEvent?>(null) }
+
+    LaunchedEffect(Unit) {
+        events.collect { event -> currentEvent = event }
+    }
+
+    currentEvent?.let { event ->
+        val message = when (event) {
+            is CoinScreenEvent.CoinMoved -> {
+                pluralStringResource(
+                    Res.plurals.collection_coins_moved,
+                    event.count,
+                    event.count,
+                    event.setName
+                )
+            }
+
+            is CoinScreenEvent.Error -> "An error occurred. Please try again."
+        }
+
+        LaunchedEffect(event) {
+            snackbarHostState.showSnackbar(message)
+            currentEvent = null
+        }
+    }
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
@@ -88,7 +123,7 @@ fun CoinScreen(
                     IconButton(onClick = { /* TODO */ }) {
                         Icon(Icons.Outlined.Edit, contentDescription = null)
                     }
-                    IconButton(onClick = { /* TODO */ }) {
+                    IconButton(onClick = { onScreenAction(CoinScreenAction.ShowMoveSheet) }) {
                         Icon(Icons.Outlined.MoveDown, contentDescription = null)
                     }
                 }
@@ -100,6 +135,15 @@ fun CoinScreen(
         MainContent(
             state = state,
             paddingValues = paddingValues
+        )
+    }
+
+    if (state.showMoveSheet) {
+        MoveToSetSheet(
+            sets = state.sets,
+            onSelectSet = { setId -> onScreenAction(CoinScreenAction.MoveToSet(setId)) },
+            onDismiss = { onScreenAction(CoinScreenAction.DismissMoveSheet) },
+            onCreateNewSet = { onScreenAction(CoinScreenAction.DismissMoveSheet) },
         )
     }
 }
@@ -755,6 +799,7 @@ private fun CoinScreenPreview() {
     AppTheme {
         CoinScreen(
             state = CoinState(coin = dummyCoinUi),
+            events = kotlinx.coroutines.flow.emptyFlow(),
             snackbarHostState = remember { SnackbarHostState() },
             onScreenAction = {}
         )

@@ -13,5 +13,7 @@ sealed interface SetScreenAction {
     data object ConfirmRemoveSelectedFromSet : SetScreenAction
     data object RequestDeleteSelectedCoins : SetScreenAction
     data object ConfirmDeleteSelectedCoins : SetScreenAction
+    data object RequestDeleteSet : SetScreenAction
+    data object ConfirmDeleteSet : SetScreenAction
     data object DismissDialog : SetScreenAction
 }

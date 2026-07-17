@@ -13,4 +13,5 @@ data class SetState(
     val isProcessingBulkAction: Boolean = false,
     val showRemoveFromSetDialog: Boolean = false,
     val showDeleteCoinsDialog: Boolean = false,
+    val showDeleteSetDialog: Boolean = false,
 )
