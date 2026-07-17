@@ -708,7 +708,6 @@ private fun BodyText(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodyMedium,
-        lineHeight = 22.sp,
         color = MaterialTheme.colorScheme.onBackground
     )
 }
