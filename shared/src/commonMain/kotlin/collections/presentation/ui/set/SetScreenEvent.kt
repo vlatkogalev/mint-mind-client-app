@@ -7,4 +7,5 @@ sealed interface SetScreenEvent {
     data class CoinsDeleted(val count: Int) : SetScreenEvent
     data class Error(val error: NetworkError) : SetScreenEvent
     data class BulkActionBlocked(val reason: String) : SetScreenEvent
+    data object RefreshCoins : SetScreenEvent
 }

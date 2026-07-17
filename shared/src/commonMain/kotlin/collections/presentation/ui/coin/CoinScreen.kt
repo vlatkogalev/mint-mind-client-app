@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -151,9 +152,15 @@ private fun MainContent(
                     if (coin.obverseDescription.isNotEmpty()) {
                         BodyText(coin.obverseDescription)
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     if (coin.obverseLettering.isNotEmpty()) {
                         InscriptionBlock(coin.obverseLettering)
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     if (coin.obverseDesigner.isNotEmpty()) {
                         DesignerLabel("Designer — ${coin.obverseDesigner}")
                     }
@@ -168,9 +175,15 @@ private fun MainContent(
                     if (coin.reverseDescription.isNotEmpty()) {
                         BodyText(coin.reverseDescription)
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     if (coin.reverseLettering.isNotEmpty()) {
                         InscriptionBlock(coin.reverseLettering)
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     if (coin.reverseDesigner.isNotEmpty()) {
                         DesignerLabel("Designer — ${coin.reverseDesigner}")
                     }
@@ -464,7 +477,6 @@ private fun FactEyebrow(text: String) {
 
 @Composable
 private fun SpecGrid(specs: List<CoinUiModel.SpecEntry>) {
-    // 2-column grid manually with Rows
     specs.chunked(2).forEach { pair ->
         Row(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -688,7 +700,7 @@ private fun Eyebrow(text: String) {
         style = MaterialTheme.typography.labelSmall,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.tertiary,
-        modifier = Modifier.padding(bottom = 12.dp)
+        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
     )
 }
 
@@ -699,13 +711,14 @@ private fun FieldRow(label: String, value: String) {
         text = label.uppercase(),
         style = MaterialTheme.typography.labelSmall,
         color = AppThemeExt.colors.textSecondary,
+        modifier = Modifier.fillMaxWidth()
     )
     Text(
         text = value,
         style = MaterialTheme.typography.bodyMedium,
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.onBackground,
-        modifier = Modifier.padding(top = 2.dp)
+        modifier = Modifier.fillMaxWidth()
     )
 }
 
@@ -716,8 +729,7 @@ private fun BodyText(text: String) {
         text = text,
         style = MaterialTheme.typography.bodyMedium,
         lineHeight = 22.sp,
-        color = MaterialTheme.colorScheme.onBackground,
-        modifier = Modifier.padding(bottom = 12.dp)
+        color = MaterialTheme.colorScheme.onBackground
     )
 }
 
@@ -727,12 +739,12 @@ private fun InscriptionBlock(text: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 10.dp)
+            .height(IntrinsicSize.Min)
     ) {
         Box(
             modifier = Modifier
                 .width(2.dp)
-                .height(40.dp)
+                .fillMaxHeight()
                 .background(MaterialTheme.colorScheme.tertiary)
         )
         Text(
@@ -742,7 +754,7 @@ private fun InscriptionBlock(text: String) {
             color = AppThemeExt.colors.silver,
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                .padding(start = 14.dp, end = 12.dp, top = 8.dp, bottom = 8.dp)
+                .padding(start = 8.dp, top = 4.dp, bottom = 4.dp)
                 .fillMaxWidth()
         )
     }

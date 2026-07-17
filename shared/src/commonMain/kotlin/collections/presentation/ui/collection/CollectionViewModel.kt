@@ -21,6 +21,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class CollectionViewModel(
@@ -39,6 +42,7 @@ class CollectionViewModel(
         .cachedIn(viewModelScope)
 
     private val setSort = MutableStateFlow(CoinSetSortOption.DEFAULT)
+    private var lastCoinsRefresh: Instant? = null
 
     init {
         observeCollectionStats()
@@ -51,6 +55,12 @@ class CollectionViewModel(
     fun onScreenResumed() {
         viewModelScope.launch { collectionRepository.storeCollectionStats() }
         viewModelScope.launch { collectionRepository.storeSets(setSort.value) }
+
+        val now = Clock.System.now()
+        if (lastCoinsRefresh == null || (now - lastCoinsRefresh!!) >= COINS_REFRESH_THRESHOLD) {
+            lastCoinsRefresh = now
+            viewModelScope.launch { _events.send(CollectionScreenEvent.RefreshCoins) }
+        }
     }
 
     private fun observeCollectionStats() {
@@ -271,5 +281,6 @@ class CollectionViewModel(
 
     companion object {
         private const val BULK_ACTION_LIMIT = 200
+        private val COINS_REFRESH_THRESHOLD = 30.seconds
     }
 }

@@ -57,8 +57,8 @@ fun CoinItem(
                 .padding(8.dp)
         ) {
             ObjectVisuals(
-                obverseImagePath = coin.obverseThumbnailUrl ?: coin.obverseUrl,
-                reverseImagePath = coin.reverseThumbnailUrl ?: coin.reverseUrl,
+                obverseImagePath = coin.displayObverseUrl,
+                reverseImagePath = coin.displayReverseUrl,
                 modifier = Modifier.weight(0.35f)
             )
 

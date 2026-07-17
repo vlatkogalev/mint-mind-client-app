@@ -23,7 +23,10 @@ data class CollectionStats(
         val estimatedValueMean: Double?,
         val setId: String?,
         val createdAt: Long
-    )
+    ) {
+        val displayObverseUrl: String get() = obverseThumbnailUrl ?: obverseUrl
+        val displayReverseUrl: String get() = reverseThumbnailUrl ?: reverseUrl
+    }
 
     enum class HighlightType {
         MOST_VALUABLE,

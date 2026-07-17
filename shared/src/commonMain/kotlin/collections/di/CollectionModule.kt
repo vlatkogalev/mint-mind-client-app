@@ -14,8 +14,7 @@ val collectionModule = module {
         CollectionRepositoryImpl(
             get(),
             get(),
-            coreComponent.tokenManager,
-            coreComponent.applicationScope
+            coreComponent.tokenManager
         )
     }
 

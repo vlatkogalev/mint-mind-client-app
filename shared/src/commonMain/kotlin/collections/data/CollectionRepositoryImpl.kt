@@ -14,8 +14,6 @@ import app.domain.model.EmptyNetworkResult
 import app.domain.model.NetworkResult
 import app.domain.model.asEmptyDataNetworkResult
 import app.domain.model.map
-import app.domain.model.onError
-import app.domain.toErrorMessage
 import collections.data.local.dao.CoinDao
 import collections.data.local.dao.CoinDetailsDao
 import collections.data.local.dao.CoinPagingStateDao
@@ -37,7 +35,6 @@ import collections.data.remote.mapper.toCatalogueNumberEntities
 import collections.data.remote.mapper.toCoin
 import collections.data.remote.mapper.toCoinDataEntity
 import collections.data.remote.mapper.toCoinDetailsEntity
-import collections.data.remote.mapper.toCoinEntity
 import collections.data.remote.mapper.toCoinSet
 import collections.data.remote.mapper.toCoinSetEntities
 import collections.data.remote.mapper.toCoinSetEntity
@@ -52,25 +49,21 @@ import collections.domain.model.CoinSet
 import collections.domain.model.CoinSetSortOption
 import collections.domain.model.CoinSortOption
 import collections.domain.model.CollectionStats
-import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 
 class CollectionRepositoryImpl(
     private val httpClient: HttpClient,
     private val db: AppDatabase,
     private val tokenManager: TokenManager,
-    private val appScope: CoroutineScope,
 ) : CollectionRepository {
     private val coinDetailsDao: CoinDetailsDao = db.coinDetailsDao()
     private val collectionStatsDao: CollectionStatsDao = db.collectionStatsDao()
@@ -241,22 +234,6 @@ class CollectionRepositoryImpl(
         return safeCall<SaveToCollectionDto> {
             httpClient.post(urlString = constructUrl("/coins")) {
                 setBody(request)
-            }
-        }.map { dto ->
-            coinDao.upsertAll(listOf(dto.toCoinEntity()))
-            appScope.launch {
-                storeCollectionStats().onError {
-                    Napier.w(
-                        "Failed to refresh collection stats after save: ${
-                            it.toErrorMessage().asString()
-                        }"
-                    )
-                }
-            }
-            appScope.launch {
-                storeSets().onError {
-                    Napier.w("Failed to refresh sets after save: ${it.toErrorMessage().asString()}")
-                }
             }
         }.asEmptyDataNetworkResult()
     }

@@ -193,6 +193,9 @@
     <string name="collection_sort_total_value_low_to_high">Total Value: Low to High</string>
 
     <!-- Feed -->
+    <string name="set_total_value">Set value</string>
+
+    <!-- Feed -->
     <string name="feed_empty_feed_title">No news available</string>
     <string name="feed_empty_feed_text">There are no recent articles about coins right now.</string>
     <string name="feed_empty_listing_title">No coin listings found</string>

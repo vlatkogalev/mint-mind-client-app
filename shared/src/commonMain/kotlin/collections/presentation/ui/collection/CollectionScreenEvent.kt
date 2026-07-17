@@ -8,4 +8,5 @@ sealed interface CollectionScreenEvent {
     data class CoinsMoved(val count: Int, val setName: String) : CollectionScreenEvent
     data class Error(val error: NetworkError) : CollectionScreenEvent
     data class BulkActionBlocked(val reason: String) : CollectionScreenEvent
+    data object RefreshCoins : CollectionScreenEvent
 }

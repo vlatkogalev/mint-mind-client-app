@@ -17,6 +17,9 @@ data class Coin(
     val setId: String?,
     val createdAt: Long
 ) {
+    val displayObverseUrl: String get() = obverseThumbnailUrl ?: obverseUrl
+    val displayReverseUrl: String get() = reverseThumbnailUrl ?: reverseUrl
+
     companion object {
         val dummyItem = Coin(
             id = "123",

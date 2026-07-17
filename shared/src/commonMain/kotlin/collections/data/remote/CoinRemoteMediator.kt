@@ -63,10 +63,9 @@ class CoinRemoteMediator(
                     val entities = response.data.toCoinEntities()
                     db.coinPagingStateDao().clear(queryKey)
                     if (setId == null) {
-                        // replaceAll (clearAll + upsertAll) wipes rows beyond page 1 until
-                        // append reloads them. Coins written locally via saveToCollection are
-                        // re-overwritten from the server response via @Upsert on the PK, so the
-                        // locally-written row is briefly visible but not lost — acceptable UX.
+                        // The coins table is a server mirror. Mutations trigger a resume-time
+                        // page refresh. replaceAll on REFRESH is intentional — it ensures
+                        // a clean reset to the current server state.
                         db.coinDao().replaceAll(entities)
                     } else {
                         db.coinDao().upsertAll(entities)

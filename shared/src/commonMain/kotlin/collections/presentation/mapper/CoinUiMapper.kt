@@ -97,15 +97,8 @@ private fun buildSpecs(coin: CoinDetails): List<CoinUiModel.SpecEntry> = buildLi
     coin.coinData.edge?.let { add(CoinUiModel.SpecEntry("Edge", it)) }
     coin.coinData.shape?.let { add(CoinUiModel.SpecEntry("Shape", it)) }
     coin.coinData.technique?.let { add(CoinUiModel.SpecEntry("Technique", it)) }
-    coin.coinData.metalComposition?.let { add(CoinUiModel.SpecEntry("Composition", it)) }
-    coin.coinData.orientation?.let {
-        add(
-            CoinUiModel.SpecEntry(
-                "Orientation",
-                it.replaceFirstChar { c -> c.uppercaseChar() })
-        )
-    }
     coin.coinData.mintage?.let { add(CoinUiModel.SpecEntry("Mintage", it.formatWithThousands())) }
+    coin.coinData.metalComposition?.let { add(CoinUiModel.SpecEntry("Composition", it)) }
 }
 
 private fun buildContextBody(analysisNotes: String?, historicalContext: String?): String {

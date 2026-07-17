@@ -37,12 +37,14 @@ import collections.domain.model.CollectionStats
 import collections.presentation.ui.collection.CollectionScreenAction
 import collections.presentation.ui.collection.CollectionState
 import mintmind.shared.generated.resources.Res
+import mintmind.shared.generated.resources.coin_placeholder
 import mintmind.shared.generated.resources.collection_most_ancient
 import mintmind.shared.generated.resources.collection_most_valuable
 import mintmind.shared.generated.resources.collection_rarest
 import mintmind.shared.generated.resources.identify_coin_side_obverse
 import mintmind.shared.generated.resources.identify_coin_side_reverse
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -94,8 +96,8 @@ private fun LazyGridScope.highlightItems(
             BestObjectItem(
                 name = coin.denomination,
                 countryOrIssuer = coin.countryOrIssuer,
-                obverseImagePath = coin.obverseUrl,
-                reverseImagePath = coin.reverseUrl,
+                obverseImagePath = coin.displayObverseUrl,
+                reverseImagePath = coin.displayReverseUrl,
                 value = coin.highlightValue(),
                 label = stringResource(coin.type.labelRes())
             )
@@ -166,6 +168,8 @@ private fun BestObjectItem(
                 model = obverseImagePath,
                 contentDescription = stringResource(Res.string.identify_coin_side_obverse),
                 contentScale = ContentScale.FillBounds,
+                placeholder = painterResource(Res.drawable.coin_placeholder),
+                error = painterResource(Res.drawable.coin_placeholder),
                 modifier = Modifier
                     .size(120.dp)
                     .aspectRatio(1f)
@@ -176,6 +180,8 @@ private fun BestObjectItem(
                 model = reverseImagePath,
                 contentDescription = stringResource(Res.string.identify_coin_side_reverse),
                 contentScale = ContentScale.FillBounds,
+                placeholder = painterResource(Res.drawable.coin_placeholder),
+                error = painterResource(Res.drawable.coin_placeholder),
                 modifier = Modifier
                     .size(120.dp)
                     .aspectRatio(1f)

@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SetViewModel(
@@ -36,9 +39,21 @@ class SetViewModel(
         .flatMapLatest { collectionRepository.getCoins(sortBy = it, setId = setId) }
         .cachedIn(viewModelScope)
 
+    private var lastCoinsRefresh: Instant? = null
+
     init {
         observeSet()
         viewModelScope.launch { collectionRepository.storeSet(setId) }
+    }
+
+    fun onScreenResumed() {
+        viewModelScope.launch { collectionRepository.storeSet(setId) }
+
+        val now = Clock.System.now()
+        if (lastCoinsRefresh == null || (now - lastCoinsRefresh!!) >= COINS_REFRESH_THRESHOLD) {
+            lastCoinsRefresh = now
+            viewModelScope.launch { _events.send(SetScreenEvent.RefreshCoins) }
+        }
     }
 
     private fun observeSet() {
@@ -168,5 +183,6 @@ class SetViewModel(
 
     companion object {
         private const val BULK_ACTION_LIMIT = 200
+        private val COINS_REFRESH_THRESHOLD = 30.seconds
     }
 }

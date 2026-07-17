@@ -67,7 +67,7 @@ import mintmind.shared.generated.resources.collection_remove_item
 import mintmind.shared.generated.resources.collection_set_coins_deleted
 import mintmind.shared.generated.resources.collection_set_empty_desc
 import mintmind.shared.generated.resources.collection_set_empty_title
-import mintmind.shared.generated.resources.collection_total_value
+import mintmind.shared.generated.resources.set_total_value
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -82,7 +82,12 @@ fun SetScreen(
     var currentEvent by remember { mutableStateOf<SetScreenEvent?>(null) }
 
     LaunchedEffect(Unit) {
-        events.collect { currentEvent = it }
+        events.collect { event ->
+            when (event) {
+                is SetScreenEvent.RefreshCoins -> coins.refresh()
+                else -> currentEvent = event
+            }
+        }
     }
 
     currentEvent?.let { event ->
@@ -106,6 +111,8 @@ fun SetScreen(
             is SetScreenEvent.Error -> "An error occurred. Please try again."
 
             is SetScreenEvent.BulkActionBlocked -> event.reason
+
+            is SetScreenEvent.RefreshCoins -> ""
         }
 
         LaunchedEffect(event) {
@@ -156,7 +163,7 @@ private fun MainContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         StatsToolbar(
-            title = stringResource(Res.string.collection_total_value),
+            title = stringResource(Res.string.set_total_value),
             totalValue = state.set?.totalValue ?: 0.0,
             objectCount = state.set?.coinCount ?: 0,
             issuerCount = state.set?.issuerCount ?: 0,

@@ -65,7 +65,12 @@ fun CollectionScreen(
     var currentEvent by remember { mutableStateOf<CollectionScreenEvent?>(null) }
 
     LaunchedEffect(Unit) {
-        events.collect { currentEvent = it }
+        events.collect { event ->
+            when (event) {
+                is CollectionScreenEvent.RefreshCoins -> coins.refresh()
+                else -> currentEvent = event
+            }
+        }
     }
 
     currentEvent?.let { event ->
@@ -98,6 +103,8 @@ fun CollectionScreen(
             is CollectionScreenEvent.Error -> "An error occurred. Please try again."
 
             is CollectionScreenEvent.BulkActionBlocked -> event.reason
+
+            is CollectionScreenEvent.RefreshCoins -> ""
         }
 
         LaunchedEffect(event) {
