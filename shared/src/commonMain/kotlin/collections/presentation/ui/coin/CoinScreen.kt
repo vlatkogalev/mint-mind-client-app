@@ -22,7 +22,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.MoveDown
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -53,9 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import app.presentation.components.AppTopBar
-import app.presentation.components.PrimaryButton
 import app.presentation.components.ReededDivider
-import app.presentation.components.SecondaryButton
 import app.presentation.theme.AppTheme
 import app.presentation.theme.AppThemeExt
 import coil3.compose.AsyncImage
@@ -83,6 +84,14 @@ fun CoinScreen(
                 onNavigateUp = { onScreenAction(CoinScreenAction.NavigateUp) },
                 transparent = true,
                 scrollBehavior = scrollBehavior,
+                actions = {
+                    IconButton(onClick = { /* TODO */ }) {
+                        Icon(Icons.Outlined.Edit, contentDescription = null)
+                    }
+                    IconButton(onClick = { /* TODO */ }) {
+                        Icon(Icons.Outlined.MoveDown, contentDescription = null)
+                    }
+                }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -230,13 +239,6 @@ private fun MainContent(
             }
 
             item { ReededDivider(Modifier.padding(16.dp)) }
-
-            item {
-                ActionButtons(
-                    onEditNotes = { /* TODO */ },
-                    onAddToSet = { /* TODO */ },
-                )
-            }
         }
     }
 }
@@ -654,33 +656,6 @@ private fun ContextSection(
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
-    }
-}
-
-@Composable
-private fun ActionButtons(
-    onEditNotes: () -> Unit,
-    onAddToSet: () -> Unit,
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 20.dp)
-    ) {
-        SecondaryButton(
-            isLoading = false,
-            text = "Edit notes",
-            onButtonClick = { onEditNotes() },
-            modifier = Modifier.weight(1f)
-        )
-        // Filled button
-        PrimaryButton(
-            isLoading = false,
-            text = "Add to set",
-            onButtonClick = { onAddToSet() },
-            modifier = Modifier.weight(1f)
-        )
     }
 }
 
