@@ -26,7 +26,7 @@ data class CollectionHighlightsEntity(
 
     val year: Int?,
 
-    val mintage: Int,
+    val mintage: Long?,
 
     val gradeName: String,
 

@@ -50,7 +50,7 @@ data class CollectionStatsDto(
             val year: Int?,
 
             @SerialName("mintage")
-            val mintage: Int,
+            val mintage: Long?,
 
             @SerialName("gradeName")
             val gradeName: String,

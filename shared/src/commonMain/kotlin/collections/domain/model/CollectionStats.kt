@@ -16,7 +16,7 @@ data class CollectionStats(
         val denomination: String,
         val countryOrIssuer: String,
         val year: Int?,
-        val mintage: Int,
+        val mintage: Long?,
         val gradeName: String,
         val gradeAbbreviation: String,
         val gradeNumeric: Int?,
