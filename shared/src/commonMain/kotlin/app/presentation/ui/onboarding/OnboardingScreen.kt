@@ -1,15 +1,12 @@
 package app.presentation.ui.onboarding
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CenterFocusStrong
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,6 +17,9 @@ import app.presentation.components.PrimaryButton
 import app.presentation.components.SecondaryButton
 import app.presentation.theme.AppTheme
 import app.presentation.util.cutoutAwarePadding
+import mintmind.shared.generated.resources.Res
+import mintmind.shared.generated.resources.ic_logo
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun OnboardingScreen(
@@ -51,13 +51,12 @@ private fun MainContent(
                 applyStartCutoutPadding = true
             )
     ) {
-        Icon(
-            imageVector = Icons.Outlined.CenterFocusStrong,
+        Image(
+            painter = painterResource(Res.drawable.ic_logo),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(136.dp),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary
+                .height(192.dp),
+            contentDescription = null
         )
 
         Column(

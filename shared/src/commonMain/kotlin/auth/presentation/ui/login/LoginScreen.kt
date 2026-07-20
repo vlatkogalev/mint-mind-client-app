@@ -1,5 +1,6 @@
 package auth.presentation.ui.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CenterFocusStrong
 import androidx.compose.material.icons.outlined.MarkEmailRead
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Person
@@ -42,6 +42,7 @@ import app.presentation.util.cutoutAwarePadding
 import auth.presentation.components.PasswordTextField
 import mintmind.shared.generated.resources.Res
 import mintmind.shared.generated.resources.cancel
+import mintmind.shared.generated.resources.ic_logo
 import mintmind.shared.generated.resources.login_button_login
 import mintmind.shared.generated.resources.login_button_register
 import mintmind.shared.generated.resources.login_email_hint
@@ -50,6 +51,7 @@ import mintmind.shared.generated.resources.login_password_hint
 import mintmind.shared.generated.resources.login_verification_resend
 import mintmind.shared.generated.resources.login_verification_text
 import mintmind.shared.generated.resources.login_verification_title
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -87,16 +89,13 @@ fun LoginScreen(
                     .fillMaxWidth(formWidth),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.CenterFocusStrong,
+                Image(
+                    painter = painterResource(Res.drawable.ic_logo),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(136.dp),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                        .height(192.dp),
+                    contentDescription = null
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
 
                 FormTextField(
                     hint = stringResource(Res.string.login_email_hint),
