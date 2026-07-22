@@ -7,8 +7,6 @@ object Const {
     // API
     const val BASE_URL = "http://home-iot.xyz:8081/"
 
-    const val CDN_URL = ""
-
     const val PRIVACY_POLICY_URL = ""
     const val TERMS_OF_USE_URL = ""
 
@@ -53,39 +51,34 @@ object Const {
         - Include at least one positive feature when reasonably visible
         
         DENOMINATION NORMALIZATION RULES:
- 
-        Return the denomination name most commonly used by major numismatic catalogs
-        (Krause, Numista, NGC, PCGS).
-        
-        Preserve traditional denomination names.
-        
-        Do NOT convert denominations into equivalent minor units.
-        
-        Examples:
-        
+        Format: "<quantity> <unit>", where <unit> is ALWAYS the singular
+        base form of the currency unit, regardless of quantity.
+        Never pluralize the unit word. This applies EVEN WHEN major catalogs
+        (Krause, Numista, NGC, PCGS) use a plural form.
+
+        - 2 Euros      -> 2 Euro
+        - 5 Cents      -> 5 Cent
+        - 20 Euro Cents -> 20 Euro Cent
+        - 10 Denari    -> 10 Denar
+        - 50 Denari    -> 50 Denar
+        - 2 Dollars    -> 2 Dollar
+
+        Named or traditional denominations are kept as-is and are NOT forced
+        into the "<quantity> <unit>" pattern:
+
         - Half Dollar
-        - 1/2 Dollar
-        - ½ Dollar
         - Quarter Dollar
         - Dime
         - Nickel
-        - 1 Cent
-        - 5 Cents
-        - 10 Denar
-        - 50 Denar
-        - 20 Euro Cent
-        - 50 Euro Cent
-        - 1 Euro
-        - 2 Euro
-        
-        Incorrect examples:
-        
-        - 50 Cents (for Half Dollar)
-        - 25 Cents (for Quarter Dollar)
-        - 10 Cents (for Dime)
-        - 5 Cents (for Nickel)
-        - 0.5 Dollar
-        - 0.25 Dollar
+        - Penny
+
+        Do NOT convert denominations into equivalent minor units:
+
+        - Do NOT return "50 Cents" for Half Dollar
+        - Do NOT return "25 Cents" for Quarter Dollar
+        - Do NOT return "10 Cents" for Dime
+        - Do NOT return "5 Cents" for Nickel
+        - Do NOT return "0.5 Dollar" or "0.25 Dollar"
         
         VALUE RULES:
         - All monetary values MUST be regular decimal numbers

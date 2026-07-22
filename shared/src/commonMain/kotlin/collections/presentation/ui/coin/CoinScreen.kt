@@ -1,5 +1,8 @@
 package collections.presentation.ui.coin
 
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +43,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +52,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
@@ -287,11 +292,26 @@ private fun MainContent(
     }
 }
 
+// Roll-in enter animation: travel distance (enough to start off-screen on typical
+// phones) and the matching rotation for a 104.dp coin rolling that far.
+private val ROLL_DISTANCE = 300.dp
+private const val ROLL_DEGREES = 330f
+
 @Composable
 private fun HeroSection(coin: CoinUiModel) {
     val copperColor = MaterialTheme.colorScheme.tertiary
     val surfaceColor = MaterialTheme.colorScheme.surfaceContainerHigh
     val backgroundColor = MaterialTheme.colorScheme.background
+
+    // Roll-in enter animation: rememberSaveable survives the LazyColumn item being
+    // scrolled out of composition, so the roll plays only once per screen entry.
+    var entered by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) { entered = true }
+    val rollProgress by animateFloatAsState(
+        targetValue = if (entered) 0f else 1f,
+        animationSpec = tween(durationMillis = 1100, easing = EaseOutQuart),
+        label = "coinRoll"
+    )
 
     Box(
         contentAlignment = Alignment.TopCenter,
@@ -334,6 +354,12 @@ private fun HeroSection(coin: CoinUiModel) {
                         .size(104.dp)
                         .offset(x = (-44).dp)
                         .zIndex(1f)
+                        .graphicsLayer {
+                            // Left coin: rolls in from the left edge, spinning clockwise
+                            // (starts at a negative angle, unwinds to 0 as it moves right).
+                            translationX = -ROLL_DISTANCE.toPx() * rollProgress
+                            rotationZ = -ROLL_DEGREES * rollProgress
+                        }
                         .clip(CircleShape)
                         .border(2.dp, copperColor, CircleShape)
                 )
@@ -347,6 +373,12 @@ private fun HeroSection(coin: CoinUiModel) {
                         .align(Alignment.CenterStart)
                         .size(104.dp)
                         .offset(x = 44.dp)
+                        .graphicsLayer {
+                            // Right coin: rolls in from the right edge, spinning counterclockwise
+                            // (starts at a positive angle, unwinds to 0 as it moves left).
+                            translationX = ROLL_DISTANCE.toPx() * rollProgress
+                            rotationZ = ROLL_DEGREES * rollProgress
+                        }
                         .clip(CircleShape)
                         .border(2.dp, copperColor, CircleShape)
                 )
