@@ -15,6 +15,8 @@ data class IdentifyFlowState(
     val hasCameraPermission: Boolean = false,
     val hasStoragePermission: Boolean = false,
     val isFlashOn: Boolean = false,
+    val isTorchOn: Boolean = false,
+    val zoomLevel: Float = 1f,
     val cameraController: CameraController? = null,
     val cameraViewSize: IntSize? = null,
     val spotlightDiameterPx: Int? = null,

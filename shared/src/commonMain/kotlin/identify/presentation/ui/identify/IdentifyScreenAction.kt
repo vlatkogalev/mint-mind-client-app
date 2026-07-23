@@ -12,6 +12,8 @@ sealed interface IdentifyScreenAction {
     data class CameraViewParamsChanged(val size: IntSize, val diameter: Int) : IdentifyScreenAction
     data object OnCapture : IdentifyScreenAction
     data class ToggleFlash(val isFlashOn: Boolean) : IdentifyScreenAction
+    data class ToggleTorch(val isTorchOn: Boolean) : IdentifyScreenAction
+    data object CycleZoom : IdentifyScreenAction
     data class OnImageClick(val image: ImageBitmap) : IdentifyScreenAction
     data object CloseImagePreview : IdentifyScreenAction
     data class RemoveImage(val target: CaptureTarget) : IdentifyScreenAction

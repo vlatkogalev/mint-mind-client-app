@@ -1,5 +1,7 @@
 package identify.presentation.ui.identify
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateBounds
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -9,7 +11,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,6 +19,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,31 +27,38 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.FlashlightOff
+import androidx.compose.material.icons.filled.FlashlightOn
 import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledIconToggleButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingToolbarColors
+import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalFloatingToolbar
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -67,14 +76,20 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
+import app.presentation.components.AppTopBar
 import app.presentation.theme.AppTheme
+import app.presentation.util.cutoutAwarePadding
 import com.kashif.cameraK.compose.CameraPreviewView
 import com.kashif.cameraK.compose.rememberCameraKState
 import com.kashif.cameraK.enums.CameraLens
@@ -92,14 +107,27 @@ import mintmind.shared.generated.resources.coin_obverse
 import mintmind.shared.generated.resources.coin_reverse
 import mintmind.shared.generated.resources.identify_coin_side_obverse
 import mintmind.shared.generated.resources.identify_coin_side_reverse
+import mintmind.shared.generated.resources.identify_flash_off
+import mintmind.shared.generated.resources.identify_flash_on
+import mintmind.shared.generated.resources.identify_remove_image
 import mintmind.shared.generated.resources.identify_screen_title
 import mintmind.shared.generated.resources.identify_tap_to_close
+import mintmind.shared.generated.resources.identify_torch_off
+import mintmind.shared.generated.resources.identify_torch_on
 import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 import kotlin.math.sqrt
 
+private object IdentifyScreenDefaults {
+    val SpotlightRadius = 100.dp
+    const val OverlayFadeDurationMillis = 300
+    const val TransitionDurationMillis = 500
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun IdentifyScreen(
     state: IdentifyState,
@@ -128,31 +156,32 @@ fun IdentifyScreen(
 
     val overlayAlpha by animateFloatAsState(
         targetValue = if (state.bothImagesCaptured) 0.5f else 0f,
-        animationSpec = tween(durationMillis = 300),
+        animationSpec = tween(durationMillis = IdentifyScreenDefaults.OverlayFadeDurationMillis),
         label = "overlayAlpha"
     )
 
     val spotlightRadius by animateDpAsState(
-        targetValue = if (state.bothImagesCaptured) 0.dp else 100.dp,
-        animationSpec = tween(durationMillis = 500, easing = EaseInOut),
+        targetValue = if (state.bothImagesCaptured) 0.dp else IdentifyScreenDefaults.SpotlightRadius,
+        animationSpec = tween(
+            durationMillis = IdentifyScreenDefaults.TransitionDurationMillis,
+            easing = EaseInOut
+        ),
         label = "spotlightRadius"
     )
 
-    val spacerWeight by animateFloatAsState(
-        targetValue = if (state.bothImagesCaptured) 0.01f else 1f,
-        animationSpec = tween(500, easing = EaseInOut),
-        label = "spacerWeight"
-    )
-
-    val imagesWeight by animateFloatAsState(
-        targetValue = if (state.bothImagesCaptured) 1f else 0.3f,
-        animationSpec = tween(500, easing = EaseInOut),
-        label = "imagesWeight"
-    )
+    // Phone landscape: not enough height to stack the controls, so they move to the side edges.
+    val isCompactHeight = !currentWindowAdaptiveInfoV2().windowSizeClass
+        .isHeightAtLeastBreakpoint(WindowSizeClass.HEIGHT_DP_MEDIUM_LOWER_BOUND)
 
     Scaffold(
+        topBar = {
+            AppTopBar(
+                onNavigateUp = { onScreenAction(IdentifyScreenAction.NavigateUp) },
+                transparent = true,
+            )
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { _ ->
+    ) { paddingValues ->
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -181,41 +210,24 @@ fun IdentifyScreen(
 
             CameraSpotlight(spotlightRadius = spotlightRadius, overlayAlpha = overlayAlpha)
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .systemBarsPadding()
-            ) {
-                IdentifyTopBar(
-                    bothImagesCaptured = state.bothImagesCaptured,
-                    isFlashOn = state.isFlashOn,
-                    onNavigateUp = { onScreenAction(IdentifyScreenAction.NavigateUp) },
-                    onToggleFlash = { onScreenAction(IdentifyScreenAction.ToggleFlash(it)) }
+            val contentModifier = Modifier
+                .fillMaxSize()
+                .cutoutAwarePadding(
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = paddingValues.calculateBottomPadding()
                 )
 
-                Spacer(modifier = Modifier.weight(spacerWeight))
-
-                AnimatedCoinImages(
+            if (isCompactHeight) {
+                IdentifyLandscapeContent(
                     state = state,
-                    bothImagesCaptured = state.bothImagesCaptured,
-                    onImageClick = { image -> onScreenAction(IdentifyScreenAction.OnImageClick(image)) },
-                    onRemoveClick = { target ->
-                        onScreenAction(
-                            IdentifyScreenAction.RemoveImage(
-                                target
-                            )
-                        )
-                    },
-                    modifier = Modifier.weight(imagesWeight),
+                    onScreenAction = onScreenAction,
+                    modifier = contentModifier
                 )
-
-                IdentifyBottomBar(
-                    isLoading = state.isLoading,
-                    isIdentifying = state.isIdentifying,
-                    bothImagesCaptured = state.bothImagesCaptured,
-                    onCancelIdentification = { onScreenAction(IdentifyScreenAction.CancelIdentification) },
-                    onConfirmIdentification = { onScreenAction(IdentifyScreenAction.ConfirmIdentification) },
-                    onCaptureImage = { onScreenAction(IdentifyScreenAction.OnCapture) }
+            } else {
+                IdentifyPortraitContent(
+                    state = state,
+                    onScreenAction = onScreenAction,
+                    modifier = contentModifier
                 )
             }
 
@@ -229,109 +241,348 @@ fun IdentifyScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun IdentifyTopBar(
-    bothImagesCaptured: Boolean,
-    isFlashOn: Boolean,
-    onNavigateUp: () -> Unit,
-    onToggleFlash: (Boolean) -> Unit,
+private fun IdentifyPortraitContent(
+    state: IdentifyState,
+    onScreenAction: (IdentifyScreenAction) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp)
-    ) {
-        IconButton(
-            onClick = { onNavigateUp() },
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                contentDescription = null,
-                tint = Color.White
-            )
+    val spacerWeight by animateFloatAsState(
+        targetValue = if (state.bothImagesCaptured) 0.01f else 1f,
+        animationSpec = tween(IdentifyScreenDefaults.TransitionDurationMillis, easing = EaseInOut),
+        label = "spacerWeight"
+    )
+
+    val imagesWeight by animateFloatAsState(
+        targetValue = if (state.bothImagesCaptured) 1f else 0.3f,
+        animationSpec = tween(IdentifyScreenDefaults.TransitionDurationMillis, easing = EaseInOut),
+        label = "imagesWeight"
+    )
+
+    Column(modifier = modifier) {
+        Spacer(modifier = Modifier.weight(spacerWeight))
+
+        AnimatedCoinImages(
+            state = state,
+            onImageClick = { image -> onScreenAction(IdentifyScreenAction.OnImageClick(image)) },
+            onRemoveClick = { target ->
+                onScreenAction(IdentifyScreenAction.RemoveImage(target))
+            },
+            modifier = Modifier.weight(imagesWeight),
+        )
+
+        IdentifyFloatingToolbar(
+            state = state,
+            onScreenAction = onScreenAction,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(
+                    top = 16.dp,
+                    bottom = FloatingToolbarDefaults.ScreenOffset
+                )
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun IdentifyLandscapeContent(
+    state: IdentifyState,
+    onScreenAction: (IdentifyScreenAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        // FlowColumn wraps into a second column when the enlarged captured images
+        // exceed the compact window height, placing them side by side instead.
+        // LookaheadScope + animateBounds animate that reflow instead of jumping,
+        // and also animate the glide from the start edge to center on capture,
+        // since the alignment switch happens inside the scope.
+        LookaheadScope {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = 24.dp)
+            ) {
+                FlowColumn(
+                    verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                    modifier = Modifier
+                        .align(
+                            if (state.bothImagesCaptured) {
+                                Alignment.Center
+                            } else {
+                                Alignment.CenterStart
+                            }
+                        )
+                        .fillMaxHeight()
+                ) {
+                    CaptureTarget.entries.forEach { target ->
+                        CoinSideImage(
+                            state = state,
+                            target = target,
+                            onImageClick = { image ->
+                                onScreenAction(IdentifyScreenAction.OnImageClick(image))
+                            },
+                            onRemoveClick = {
+                                onScreenAction(IdentifyScreenAction.RemoveImage(it))
+                            },
+                            modifier = Modifier.animateBounds(
+                                lookaheadScope = this@LookaheadScope,
+                                boundsTransform = { _, _ ->
+                                    tween(
+                                        durationMillis = IdentifyScreenDefaults.TransitionDurationMillis,
+                                        easing = EaseInOut
+                                    )
+                                }
+                            )
+                        )
+                    }
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        IdentifyVerticalFloatingToolbar(
+            state = state,
+            onScreenAction = onScreenAction,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = FloatingToolbarDefaults.ScreenOffset)
+        )
+    }
+}
 
-        if (!bothImagesCaptured) {
-            ToggleIconButton(
-                isToggled = isFlashOn,
-                onToggleFlash = { onToggleFlash(it) }
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun IdentifyFloatingToolbar(
+    state: IdentifyState,
+    onScreenAction: (IdentifyScreenAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
+        HorizontalFloatingToolbar(
+            expanded = true,
+            colors = FloatingToolbarColors(
+                toolbarContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                toolbarContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                fabContainerColor = MaterialTheme.colorScheme.primary,
+                fabContentColor = MaterialTheme.colorScheme.onPrimary
             )
+        ) {
+            AnimatedContent(
+                targetState = state.bothImagesCaptured,
+                label = "toolbarContent"
+            ) { bothCaptured ->
+                if (bothCaptured) {
+                    CancelButton(
+                        enabled = !state.isBusy,
+                        onClick = { onScreenAction(IdentifyScreenAction.CancelIdentification) }
+                    )
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CameraControlButtons(
+                            state = state,
+                            enabled = !state.isBusy,
+                            onScreenAction = onScreenAction
+                        )
+                    }
+                }
+            }
+        }
+
+        IdentifyFab(state = state, onScreenAction = onScreenAction)
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun IdentifyVerticalFloatingToolbar(
+    state: IdentifyState,
+    onScreenAction: (IdentifyScreenAction) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
+        VerticalFloatingToolbar(
+            expanded = true,
+            colors = FloatingToolbarColors(
+                toolbarContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                toolbarContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                fabContainerColor = MaterialTheme.colorScheme.tertiary,
+                fabContentColor = MaterialTheme.colorScheme.onTertiary
+            )
+        ) {
+            AnimatedContent(
+                targetState = state.bothImagesCaptured,
+                label = "toolbarContent"
+            ) { bothCaptured ->
+                if (bothCaptured) {
+                    CancelButton(
+                        enabled = !state.isBusy,
+                        onClick = { onScreenAction(IdentifyScreenAction.CancelIdentification) }
+                    )
+                } else {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CameraControlButtons(
+                            state = state,
+                            enabled = !state.isBusy,
+                            onScreenAction = onScreenAction
+                        )
+                    }
+                }
+            }
+        }
+
+        // Last in the stack so it sits closest to the bottom corner, within thumb reach.
+        IdentifyFab(state = state, onScreenAction = onScreenAction)
+    }
+}
+
+@Composable
+private fun CameraControlButtons(
+    state: IdentifyState,
+    enabled: Boolean,
+    onScreenAction: (IdentifyScreenAction) -> Unit
+) {
+    ToolbarToggleButton(
+        checked = state.isTorchOn,
+        enabled = enabled,
+        checkedIcon = Icons.Default.FlashlightOn,
+        uncheckedIcon = Icons.Default.FlashlightOff,
+        checkedDescription = stringResource(Res.string.identify_torch_on),
+        uncheckedDescription = stringResource(Res.string.identify_torch_off),
+        onCheckedChange = {
+            onScreenAction(IdentifyScreenAction.ToggleTorch(it))
+        }
+    )
+
+    ToolbarToggleButton(
+        checked = state.isFlashOn,
+        enabled = enabled,
+        checkedIcon = Icons.Default.FlashOn,
+        uncheckedIcon = Icons.Default.FlashOff,
+        checkedDescription = stringResource(Res.string.identify_flash_on),
+        uncheckedDescription = stringResource(Res.string.identify_flash_off),
+        onCheckedChange = {
+            onScreenAction(IdentifyScreenAction.ToggleFlash(it))
+        }
+    )
+
+    IconButton(
+        enabled = enabled,
+        onClick = { onScreenAction(IdentifyScreenAction.CycleZoom) }
+    ) {
+        Text(
+            text = state.zoomLabel,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
+}
+
+@Composable
+private fun CancelButton(
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier
+) {
+    IconButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier
+    ) {
+        Icon(
+            imageVector = Icons.Default.Close,
+            contentDescription = stringResource(Res.string.cancel)
+        )
+    }
+}
+
+@Composable
+private fun IdentifyFab(
+    state: IdentifyState,
+    onScreenAction: (IdentifyScreenAction) -> Unit
+) {
+    val fabState = state.fabState
+
+    FloatingActionButton(
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
+        onClick = {
+            when (fabState) {
+                IdentifyFabState.Capture -> onScreenAction(IdentifyScreenAction.OnCapture)
+                IdentifyFabState.Identify -> onScreenAction(IdentifyScreenAction.ConfirmIdentification)
+                IdentifyFabState.Busy -> Unit
+            }
+        }
+    ) {
+        AnimatedContent(
+            targetState = fabState,
+            label = "fabContent"
+        ) { targetFabState ->
+            when (targetFabState) {
+                IdentifyFabState.Capture -> {
+                    Icon(
+                        imageVector = Icons.Default.PhotoCamera,
+                        contentDescription = null
+                    )
+                }
+
+                IdentifyFabState.Identify -> {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = stringResource(Res.string.identify_screen_title)
+                    )
+                }
+
+                IdentifyFabState.Busy -> {
+                    CircularProgressIndicator(
+                        color = LocalContentColor.current,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun IdentifyBottomBar(
-    isLoading: Boolean,
-    isIdentifying: Boolean,
-    bothImagesCaptured: Boolean,
-    onCancelIdentification: () -> Unit,
-    onConfirmIdentification: () -> Unit,
-    onCaptureImage: () -> Unit
+private fun ToolbarToggleButton(
+    checked: Boolean,
+    checkedIcon: ImageVector,
+    uncheckedIcon: ImageVector,
+    checkedDescription: String,
+    uncheckedDescription: String,
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true
 ) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(80.dp)
+    FilledIconToggleButton(
+        checked = checked,
+        enabled = enabled,
+        onCheckedChange = onCheckedChange,
+        colors = IconButtonDefaults.filledIconToggleButtonColors(
+            containerColor = Color.Transparent,
+            contentColor = LocalContentColor.current,
+            checkedContentColor = MaterialTheme.colorScheme.onPrimary
+        )
     ) {
-        if (isLoading || isIdentifying) {
-            CircularProgressIndicator(
-                color = Color.White,
-                modifier = Modifier.height(48.dp)
-            )
-        } else if (bothImagesCaptured) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(32.dp),
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.weight(1f))
-
-                OutlinedButton(
-                    onClick = { onCancelIdentification() },
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.White
-                    ),
-                    border = BorderStroke(1.dp, Color.White),
-                    modifier = Modifier.height(48.dp)
-                ) {
-                    Text(stringResource(Res.string.cancel))
-                }
-
-                Button(
-                    onClick = { onConfirmIdentification() },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
-                    ),
-                    modifier = Modifier.height(48.dp)
-                ) {
-                    Text(stringResource(Res.string.identify_screen_title))
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-            }
-        } else {
-            Icon(
-                imageVector = Icons.Default.PhotoCamera,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable { onCaptureImage() }
-                    .padding(vertical = 16.dp)
-            )
-        }
+        Icon(
+            imageVector = if (checked) checkedIcon else uncheckedIcon,
+            contentDescription = if (checked) checkedDescription else uncheckedDescription
+        )
     }
 }
 
 @Composable
 private fun AnimatedCoinImages(
     state: IdentifyState,
-    bothImagesCaptured: Boolean,
     onImageClick: (ImageBitmap) -> Unit,
     onRemoveClick: (CaptureTarget) -> Unit,
     modifier: Modifier = Modifier
@@ -347,31 +598,52 @@ private fun AnimatedCoinImages(
         ),
         modifier = modifier.fillMaxWidth()
     ) {
-        ObjectImage(
-            objectImage = state.obverseImage,
-            objectSideName = stringResource(Res.string.identify_coin_side_obverse),
-            placeholder = Res.drawable.coin_obverse,
-            isCurrentTarget = state.currentCaptureTarget == CaptureTarget.OBVERSE,
-            isIdentifying = state.isIdentifying,
-            isCurrentScanningTarget = state.currentScanningTarget == CaptureTarget.OBVERSE,
-            bothImagesCaptured = bothImagesCaptured,
-            onImageClick = onImageClick,
-            onRemoveClick = { onRemoveClick(CaptureTarget.OBVERSE) }
-        )
-
-        ObjectImage(
-            objectImage = state.reverseImage,
-            objectSideName = stringResource(Res.string.identify_coin_side_reverse),
-            placeholder = Res.drawable.coin_reverse,
-            isCurrentTarget = state.currentCaptureTarget == CaptureTarget.REVERSE,
-            isIdentifying = state.isIdentifying,
-            isCurrentScanningTarget = state.currentScanningTarget == CaptureTarget.REVERSE,
-            bothImagesCaptured = bothImagesCaptured,
-            onImageClick = onImageClick,
-            onRemoveClick = { onRemoveClick(CaptureTarget.REVERSE) }
-        )
+        CaptureTarget.entries.forEach { target ->
+            CoinSideImage(
+                state = state,
+                target = target,
+                onImageClick = onImageClick,
+                onRemoveClick = onRemoveClick
+            )
+        }
     }
 }
+
+@Composable
+private fun CoinSideImage(
+    state: IdentifyState,
+    target: CaptureTarget,
+    onImageClick: (ImageBitmap) -> Unit,
+    onRemoveClick: (CaptureTarget) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val image = state.imageFor(target)
+
+    ObjectImage(
+        modifier = modifier,
+        objectImage = image,
+        objectSideName = stringResource(target.sideNameRes),
+        placeholder = target.placeholderRes,
+        isCurrentTarget = state.isCurrentCaptureTarget(target),
+        isScanning = state.isScanningTarget(target),
+        enlarged = state.bothImagesCaptured,
+        showRemoveButton = image != null && !state.isIdentifying,
+        onImageClick = onImageClick,
+        onRemoveClick = { onRemoveClick(target) }
+    )
+}
+
+private val CaptureTarget.sideNameRes: StringResource
+    get() = when (this) {
+        CaptureTarget.OBVERSE -> Res.string.identify_coin_side_obverse
+        CaptureTarget.REVERSE -> Res.string.identify_coin_side_reverse
+    }
+
+private val CaptureTarget.placeholderRes: DrawableResource
+    get() = when (this) {
+        CaptureTarget.OBVERSE -> Res.drawable.coin_obverse
+        CaptureTarget.REVERSE -> Res.drawable.coin_reverse
+    }
 
 @Composable
 private fun ImagePreviewDialog(
@@ -431,46 +703,31 @@ private fun CameraSpotlight(
 }
 
 @Composable
-fun ToggleIconButton(
-    isToggled: Boolean,
-    onToggleFlash: (Boolean) -> Unit
-) {
-    IconButton(
-        onClick = { onToggleFlash(!isToggled) }
-    ) {
-        Icon(
-            imageVector = if (isToggled) Icons.Default.FlashOn else Icons.Default.FlashOff,
-            contentDescription = if (isToggled) "Flash on" else "Flash off",
-            tint = if (isToggled) Color.Yellow else Color.White
-        )
-    }
-}
-
-@Composable
 fun ObjectImage(
     objectImage: ImageBitmap?,
     objectSideName: String,
-    bothImagesCaptured: Boolean,
     placeholder: DrawableResource,
+    modifier: Modifier = Modifier,
     isCurrentTarget: Boolean,
-    isIdentifying: Boolean,
-    isCurrentScanningTarget: Boolean = false,
+    isScanning: Boolean,
+    enlarged: Boolean,
+    showRemoveButton: Boolean,
     onImageClick: (ImageBitmap) -> Unit,
     onRemoveClick: () -> Unit,
 ) {
     val imageWidth by animateDpAsState(
-        targetValue = if (bothImagesCaptured) 144.dp else 96.dp,
-        animationSpec = tween(durationMillis = 500),
+        targetValue = if (enlarged) 144.dp else 96.dp,
+        animationSpec = tween(durationMillis = IdentifyScreenDefaults.TransitionDurationMillis),
         label = "imageWidth"
     )
 
     val clearButtonOffset by animateDpAsState(
-        targetValue = if (bothImagesCaptured) 6.dp else 0.dp,
-        animationSpec = tween(durationMillis = 500),
+        targetValue = if (enlarged) 6.dp else 0.dp,
+        animationSpec = tween(durationMillis = IdentifyScreenDefaults.TransitionDurationMillis),
         label = "clearButtonOffset"
     )
 
-    Box {
+    Box(modifier = modifier) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.width(imageWidth)
@@ -515,7 +772,7 @@ fun ObjectImage(
                     )
                 }
 
-                if (isCurrentScanningTarget && isIdentifying) {
+                if (isScanning) {
                     ScanningOverlay(
                         isScanning = true,
                         modifier = Modifier.fillMaxSize().clip(CircleShape)
@@ -525,16 +782,17 @@ fun ObjectImage(
 
             Text(
                 text = objectSideName,
+                style = MaterialTheme.typography.labelMedium,
                 textAlign = TextAlign.Center,
                 color = Color.White,
                 modifier = Modifier.fillMaxWidth()
             )
         }
 
-        if (objectImage != null && !isIdentifying) {
+        if (showRemoveButton) {
             Icon(
                 imageVector = Icons.Default.Close,
-                contentDescription = "Remove image",
+                contentDescription = stringResource(Res.string.identify_remove_image),
                 tint = Color.White,
                 modifier = Modifier
                     .align(Alignment.TopEnd)

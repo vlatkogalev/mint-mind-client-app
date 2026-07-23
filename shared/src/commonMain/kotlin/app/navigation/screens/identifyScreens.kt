@@ -70,6 +70,14 @@ fun NavGraphBuilder.identifyScreens(
                         identifyViewModel.toggleFlash(action.isFlashOn)
                     }
 
+                    is IdentifyScreenAction.ToggleTorch -> {
+                        identifyViewModel.toggleTorch(action.isTorchOn)
+                    }
+
+                    IdentifyScreenAction.CycleZoom -> {
+                        identifyViewModel.cycleZoom()
+                    }
+
                     IdentifyScreenAction.OnCapture -> {
                         identifyViewModel.handleImageCapture()
                     }

@@ -12,6 +12,7 @@ import app.domain.toErrorMessage
 import collections.domain.CollectionRepository
 import com.kashif.cameraK.controller.CameraController
 import com.kashif.cameraK.enums.FlashMode
+import com.kashif.cameraK.enums.TorchMode
 import com.kashif.cameraK.result.ImageCaptureResult
 import identify.data.AIProvider
 import identify.data.remote.mapper.toSaveToCollectionRequest
@@ -41,6 +42,10 @@ class IdentifyViewModel(
     private val storageRepository: StorageRepository,
 ) : ViewModel() {
 
+    private companion object {
+        val ZOOM_LEVELS = listOf(1f, 1.5f, 2f, 4f)
+    }
+
     private val _state = MutableStateFlow(IdentifyFlowState())
     val state = _state.asStateFlow()
 
@@ -68,14 +73,83 @@ class IdentifyViewModel(
             val newFlashMode = if (isFlashOn) FlashMode.ON else FlashMode.OFF
             controller.setFlashMode(newFlashMode)
 
-            _state.update { it.copy(isFlashOn = isFlashOn) }
+            // Flash and torch share the same LED — enabling one turns the other off.
+            if (isFlashOn && state.value.isTorchOn) {
+                controller.setTorchMode(TorchMode.OFF)
+                _state.update { it.copy(isFlashOn = true, isTorchOn = false) }
+            } else {
+                _state.update { it.copy(isFlashOn = isFlashOn) }
+            }
         } catch (e: Exception) {
             Napier.e("Failed to set flash mode", e)
         }
     }
 
+    fun toggleTorch(isTorchOn: Boolean) {
+        val controller = state.value.cameraController
+        if (controller == null) {
+            Napier.w("CameraController not ready, cannot toggle torch.")
+            return
+        }
+
+        try {
+            val newTorchMode = if (isTorchOn) TorchMode.ON else TorchMode.OFF
+            controller.setTorchMode(newTorchMode)
+
+            // Flash and torch share the same LED — enabling one turns the other off.
+            if (isTorchOn && state.value.isFlashOn) {
+                controller.setFlashMode(FlashMode.OFF)
+                _state.update { it.copy(isTorchOn = true, isFlashOn = false) }
+            } else {
+                _state.update { it.copy(isTorchOn = isTorchOn) }
+            }
+        } catch (e: Exception) {
+            Napier.e("Failed to set torch mode", e)
+        }
+    }
+
+    fun cycleZoom() {
+        val controller = state.value.cameraController
+        if (controller == null) {
+            Napier.w("CameraController not ready, cannot change zoom.")
+            return
+        }
+
+        try {
+            val maxZoom = controller.getMaxZoom()
+            val availableLevels = ZOOM_LEVELS.filter { it <= maxZoom }.ifEmpty { listOf(1f) }
+            val currentIndex = availableLevels.indexOf(state.value.zoomLevel)
+            val newZoomLevel = availableLevels[(currentIndex + 1) % availableLevels.size]
+            controller.setZoom(newZoomLevel)
+
+            _state.update { it.copy(zoomLevel = newZoomLevel) }
+        } catch (e: Exception) {
+            Napier.e("Failed to set zoom", e)
+        }
+    }
+
     fun setCameraController(controller: CameraController) {
         _state.update { it.copy(cameraController = controller) }
+        applyCameraSettings(controller)
+    }
+
+    /**
+     * Re-applies persisted flash/torch/zoom settings to a (re)created controller, so hardware
+     * state survives the camera being recreated (e.g. when navigating back to this screen).
+     */
+    private fun applyCameraSettings(controller: CameraController) {
+        val currentState = state.value
+
+        try {
+            controller.setFlashMode(if (currentState.isFlashOn) FlashMode.ON else FlashMode.OFF)
+            controller.setTorchMode(if (currentState.isTorchOn) TorchMode.ON else TorchMode.OFF)
+
+            if (currentState.zoomLevel > 1f) {
+                controller.setZoom(currentState.zoomLevel)
+            }
+        } catch (e: Exception) {
+            Napier.e("Failed to re-apply camera settings", e)
+        }
     }
 
     fun onCameraViewParametersChanged(viewSize: IntSize, spotlightDiameter: Int) {

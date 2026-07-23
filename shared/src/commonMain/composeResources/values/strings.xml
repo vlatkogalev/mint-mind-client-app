@@ -94,6 +94,11 @@
     <string name="identify_coin_side_reverse">Reverse</string>
     <string name="identify_coin_identification_error">Object identification failed.</string>
     <string name="identify_tap_to_close">Tap anywhere to close</string>
+    <string name="identify_flash_on">Flash on</string>
+    <string name="identify_flash_off">Flash off</string>
+    <string name="identify_torch_on">Torch on</string>
+    <string name="identify_torch_off">Torch off</string>
+    <string name="identify_remove_image">Remove image</string>
 
     <!-- Collection -->
     <string name="collection_screen_title">Collection</string>
